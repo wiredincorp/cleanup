@@ -13,16 +13,20 @@ const setText = (selector: string, text: string) => {
 // Compact navigation uses the same destinations as the desktop header.
 const menuToggle = $<HTMLButtonElement>('.menu-toggle');
 const navigation = $('#main-navigation');
-function closeMenu() {
-  menuToggle?.setAttribute('aria-expanded', 'false');
-  menuToggle?.setAttribute('aria-label', 'Open navigation');
-  navigation?.classList.remove('is-open');
+const headerSurface = $('.header-surface');
+function setMenu(open: boolean) {
+  menuToggle?.setAttribute('aria-expanded', String(open));
+  menuToggle?.setAttribute('aria-label', open ? 'Close navigation' : 'Open navigation');
+  menuToggle?.querySelector('use')?.setAttribute('href', open ? '#i-close' : '#i-menu');
+  navigation?.classList.toggle('is-open', open);
+  headerSurface?.classList.toggle('is-menu-open', open);
 }
+const closeMenu = () => setMenu(false);
 menuToggle?.addEventListener('click', () => {
   const open = menuToggle.getAttribute('aria-expanded') !== 'true';
-  menuToggle.setAttribute('aria-expanded', String(open));
-  menuToggle.setAttribute('aria-label', open ? 'Close navigation' : 'Open navigation');
-  navigation?.classList.toggle('is-open', open);
+  setMenu(open);
+  // The sheet sits before the toggle in source order, so bring focus into it.
+  if (open) navigation?.querySelector('a')?.focus();
 });
 navigation?.addEventListener('click', (event) => {
   if (event.target instanceof Element && event.target.closest('a')) closeMenu();
@@ -37,6 +41,11 @@ document.addEventListener('click', (event) => {
   if (event.target instanceof Node && !menuToggle?.contains(event.target) && !navigation?.contains(event.target)) closeMenu();
 });
 matchMedia('(min-width: 768px)').addEventListener('change', closeMenu);
+
+// A hairline appears under the header once content scrolls beneath it.
+const markScrolled = () => headerSurface?.classList.toggle('is-scrolled', scrollY > 4);
+addEventListener('scroll', markScrolled, { passive: true });
+markScrolled();
 
 // Tabs: shared by the preview rail and the install panel (WAI-ARIA tabs pattern).
 function setupTabs(tabs: HTMLButtonElement[]) {
@@ -171,15 +180,19 @@ $('#organize-undo')?.addEventListener('click', () => {
 });
 
 // Theme.
-const themeToggle = $<HTMLButtonElement>('.theme-toggle');
-const themeIcon = $<SVGUseElement>('.theme-toggle use');
+// The header has an icon-only toggle; the compact menu has a labelled one.
+const themeToggles = $$<HTMLButtonElement>('.theme-toggle');
 const themeColor = $<HTMLMetaElement>('meta[name="theme-color"]');
 const systemTheme = matchMedia('(prefers-color-scheme: dark)');
 
 function applyTheme(dark: boolean) {
   document.documentElement.dataset.theme = dark ? 'dark' : 'light';
-  themeIcon?.setAttribute('href', dark ? '#i-sun' : '#i-moon');
-  themeToggle?.setAttribute('aria-label', dark ? 'Switch to light theme' : 'Switch to dark theme');
+  for (const toggle of themeToggles) {
+    $('use', toggle)?.setAttribute('href', dark ? '#i-sun' : '#i-moon');
+    const label = $('[data-theme-label]', toggle);
+    if (label) label.textContent = dark ? 'Use light theme' : 'Use dark theme';
+    else toggle.setAttribute('aria-label', dark ? 'Switch to light theme' : 'Switch to dark theme');
+  }
   themeColor?.setAttribute('content', dark ? '#1b1b1b' : '#f7f8f7');
 }
 
@@ -191,11 +204,13 @@ systemTheme.addEventListener('change', (event) => {
     applyTheme(event.matches);
   }
 });
-themeToggle?.addEventListener('click', () => {
-  const dark = document.documentElement.dataset.theme !== 'dark';
-  applyTheme(dark);
-  try { localStorage.setItem('cleanup-theme', dark ? 'dark' : 'light'); } catch { /* private mode */ }
-});
+for (const toggle of themeToggles) {
+  toggle.addEventListener('click', () => {
+    const dark = document.documentElement.dataset.theme !== 'dark';
+    applyTheme(dark);
+    try { localStorage.setItem('cleanup-theme', dark ? 'dark' : 'light'); } catch { /* private mode */ }
+  });
+}
 
 if (config.repositoryUrl) {
   for (const link of $$<HTMLAnchorElement>('[data-repository]')) {

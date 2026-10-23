@@ -29,7 +29,7 @@ export function seo(): Plugin {
         ];
         if (origin) {
           const url = origin + (docs ? '/build-notes.html' : '/');
-          const image = origin + '/social-v2.png';
+          const image = origin + '/social-v3.png';
           tags.push(`<link rel="canonical" href="${url}" />`, `<meta property="og:url" content="${url}" />`, `<meta name="twitter:image" content="${image}" />`);
           html = html.replace(/<meta property="og:image"[^>]*\/>/, `<meta property="og:image" content="${image}" />`);
           if (docs) tags.push(`<meta property="og:title" content="${escape(title)}" />`, `<meta property="og:description" content="${escape(description)}" />`, `<meta property="og:image" content="${image}" />`, `<meta property="og:image:alt" content="${escape(imageAlt)}" />`, '<meta name="twitter:card" content="summary_large_image" />');

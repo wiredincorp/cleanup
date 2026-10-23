@@ -9,7 +9,7 @@
     <meta property="og:title" content="cleanup for Windows | A little less clutter" />
     <meta property="og:description" content="A calm Windows app for reviewing app removals and previewing folder changes before anything moves." />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="/social-v2.png" />
+    <meta property="og:image" content="/social-v3.png" />
     <meta property="og:image:alt" content="cleanup for Windows 11. A little less clutter. A lot more room." />
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -52,6 +52,7 @@
         <symbol id="i-code" viewBox="0 0 24 24"><path d="m8 6-6 6 6 6m8-12 6 6-6 6m-3-15-2 18" /></symbol>
         <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="13" rx="2" /><path d="M16 8V3H3v13h5" /></symbol>
         <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 8h16M4 16h16" /></symbol>
+        <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18" /></symbol>
       </defs>
     </svg>
     <a class="skip-link" href="#main">Skip to content</a>
@@ -59,11 +60,14 @@
     <header class="site-header site-header--main shell flex items-center justify-between gap-5">
       <a class="brand flex items-center gap-2.5" href="#" aria-label="cleanup home"><img src="/logo.svg" alt="" width="26" height="26" /><span>cleanup</span></a>
       <nav id="main-navigation" class="main-nav flex items-center gap-8" aria-label="Main navigation">
-        <a href="#app-preview">Preview</a><a href="#download">Downloads</a><a href="#questions">FAQ</a>
+        <a href="#app-preview">Preview<svg class="icon nav-chevron" aria-hidden="true"><use href="#i-chevron" /></svg></a>
+        <a href="#download">Downloads<svg class="icon nav-chevron" aria-hidden="true"><use href="#i-chevron" /></svg></a>
+        <a href="#questions">FAQ<svg class="icon nav-chevron" aria-hidden="true"><use href="#i-chevron" /></svg></a>
+        <button class="theme-toggle nav-theme" type="button"><span data-theme-label>Use dark theme</span><svg class="icon" aria-hidden="true"><use href="#i-moon" /></svg></button>
       </nav>
       <div class="header-actions flex items-center gap-3">
         <button class="theme-toggle icon-button" type="button" aria-label="Switch to dark theme"><svg class="icon" aria-hidden="true"><use href="#i-moon" /></svg></button>
-        <a class="button button-small" href="#download">Downloads</a>
+        <a class="button button-small header-download" href="#download">Download</a>
         <button class="menu-toggle icon-button" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="main-navigation"><svg class="icon" aria-hidden="true"><use href="#i-menu" /></svg></button>
       </div>
     </header>
