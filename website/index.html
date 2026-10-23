@@ -3,15 +3,17 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#fcfbfe" />
-    <meta name="description" content="A little less clutter. A lot more room. cleanup is a native Windows 11 app for removing applications and organizing folders, with a preview before you act." />
-    <meta property="og:title" content="cleanup — A little less clutter." />
-    <meta property="og:description" content="Remove the apps you’ve outgrown. Put your files in their place. Made for Windows 11." />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#f5f6f7" />
+    <meta name="description" content="A small Windows 11 app for reviewing app removals and organizing folders. Preview changes before anything moves." />
+    <meta property="og:title" content="cleanup for Windows | A little less clutter" />
+    <meta property="og:description" content="A small Windows 11 app for reviewing app removals and organizing folders. Preview changes before anything moves." />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="/social.png" />
+    <meta property="og:image" content="/social-v2.png" />
+    <meta property="og:image:alt" content="cleanup for Windows 11. A little less clutter. A lot more room." />
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <title>cleanup — A little less clutter.</title>
+    <title>cleanup for Windows | A little less clutter</title>
     <script>
       try { const t = localStorage.getItem('cleanup-theme'); if (t === 'dark' || (!t && matchMedia('(prefers-color-scheme: dark)').matches)) document.documentElement.dataset.theme = 'dark'; } catch {}
       if (!matchMedia('(prefers-reduced-motion: reduce)').matches && 'IntersectionObserver' in window) {
@@ -20,8 +22,8 @@
       }
     </script>
     <style>
-      html { background: #fcfbfe; color-scheme: light; }
-      html[data-theme="dark"] { background: #17151e; color-scheme: dark; }
+      html { background: #f5f6f7; color-scheme: light; }
+      html[data-theme="dark"] { background: #1b1b1b; color-scheme: dark; }
       html[data-motion="pending"] main { opacity: 0; }
       html[data-motion="pending"] .site-header .brand > :first-child { opacity: 0; }
     </style>
@@ -57,11 +59,11 @@
     <header class="site-header site-header--main shell flex items-center justify-between gap-5">
       <a class="brand flex items-center gap-2.5" href="#" aria-label="cleanup home"><img src="/logo.svg" alt="" width="26" height="26" /><span>cleanup</span></a>
       <nav id="main-navigation" class="main-nav flex items-center gap-8" aria-label="Main navigation">
-        <a href="#features">Why cleanup</a><a href="#how-it-works">How it works</a><a href="#questions">Questions</a><a href="/build-notes.html">Build notes</a>
+        <a href="#features">Features</a><a href="#how-it-works">How it works</a><a href="#download">Downloads</a><a href="#questions">Questions</a>
       </nav>
       <div class="header-actions flex items-center gap-3">
-        <button class="theme-toggle icon-button" type="button" aria-label="Switch to dark theme"><svg class="icon"><use href="#i-moon" /></svg></button>
-        <a class="button button-small" href="#download">Get cleanup</a>
+        <button class="theme-toggle icon-button" type="button" aria-label="Switch to dark theme"><svg class="icon" aria-hidden="true"><use href="#i-moon" /></svg></button>
+        <a class="button button-small" href="#download">Downloads</a>
         <button class="menu-toggle icon-button" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="main-navigation"><svg class="icon" aria-hidden="true"><use href="#i-menu" /></svg></button>
       </div>
     </header>
@@ -72,15 +74,16 @@
         <div class="hero-copy">
           <p class="hero-eyebrow"><span class="status-dot" aria-hidden="true"></span> A fresh start for your Windows PC</p>
           <h1><span class="hero-title-line">A little less clutter.</span><span class="hero-title-line hero-title-line--accent">A lot more room.</span></h1>
-          <p class="hero-description">Remove the apps you’ve outgrown. Put your files in their place. Get back to the things you actually opened your computer for.</p>
+          <p class="hero-description">A native Windows app for a calmer PC. Review apps before you remove them, then preview folder changes before anything moves.</p>
           <div class="hero-actions flex flex-wrap items-center gap-5">
-            <a class="button" href="#download"><svg class="icon icon-fill"><use href="#i-windows" /></svg> Get cleanup</a>
+            <a class="button" href="https://github.com/wiredincorp/cleanup/releases/download/v0.1.2-rc.1/cleanup-0.1.2-windows-x64-setup.exe" data-setup><svg class="icon icon-fill" aria-hidden="true"><use href="#i-windows" /></svg>Install for Windows</a>
+            <a class="button button-secondary" href="https://github.com/wiredincorp/cleanup/releases/download/v0.1.2-rc.1/Cleanup.exe" data-download><svg class="icon" aria-hidden="true"><use href="#i-folder" /></svg>Portable for USB</a>
             <a class="text-link" href="#app-preview">Take a look <svg class="icon" aria-hidden="true"><use href="#i-arrow" /></svg></a>
           </div>
-          <p class="hero-note">Native Windows app <span>·</span> MIT licensed <span>·</span> In development</p>
+          <p class="hero-note">Windows 11 x64 <span>·</span> Preview release <span>·</span> MIT licensed</p>
         </div>
 
-        <div class="product-stage" id="app-preview">
+        <div class="product-stage" id="app-preview" role="region" aria-label="Interactive preview of the cleanup app">
           <div class="app-window">
             <div class="win-titlebar">
               <span class="win-app"><img class="app-logo-light" src="/logo.svg" alt="" width="16" height="16" /><img class="app-logo-dark" src="/logo-dark.svg" alt="" width="16" height="16" />cleanup</span>
@@ -99,7 +102,7 @@
                   <button id="tab-history" role="tab" aria-selected="false" aria-controls="panel-history" data-view="history" tabindex="-1"><svg class="win-icon"><use href="#i-history" /></svg><span class="win-label">History</span></button>
                 </div>
                 <section class="win-selection" aria-label="Selection">
-                  <h3 class="win-selection-title">Selection</h3>
+                  <p class="win-selection-title">Selection</p>
                   <p data-selection-empty>Choose apps to see them here.</p>
                   <div data-selection-active hidden>
                     <div class="sel-strip" id="selection-icons"></div>
@@ -190,17 +193,37 @@
       <section id="open-source" class="source-section shell flex flex-col items-start justify-between gap-8 md:flex-row md:items-center">
         <div class="source-mark" aria-hidden="true"><svg><use href="#i-code" /></svg></div>
         <div class="source-copy"><h2>Your computer. An open approach.</h2><p id="source-description">Native C# and WinUI on the surface. Rust for the system work.<br class="desktop-break" /> MIT licensed, with the source on GitHub.</p></div>
-        <div class="flex flex-col items-start gap-1"><a class="text-link source-link" href="#" data-repository hidden>View the source</a><a class="text-link source-link" href="/build-notes.html">Read the build notes</a><a class="text-link source-link" href="https://discord.gg/5kRtCcNWU6" data-discord>Discord support</a></div>
+        <div class="flex flex-col items-start gap-1"><a class="text-link source-link" href="#" data-repository hidden>View the source</a><a class="text-link source-link" href="/build-notes.html">Download help</a><a class="text-link source-link" href="https://discord.gg/5kRtCcNWU6" data-discord>Discord support</a></div>
       </section>
 
-      <section id="download" class="download-section scroll-target">
-        <div class="shell download-grid grid gap-12 md:grid-cols-2">
-          <div class="download-copy"><img src="/logo.svg" alt="" width="48" height="48" /><h2>A little room <br />for what’s next.</h2><p id="download-platform">Made for Windows 11, x64.<br />One file, runtimes included.</p><span class="development-badge"><span class="status-dot"></span> <span id="download-status">Preview available on GitHub</span></span></div>
-          <div class="install-panel">
-            <div class="install-tabs flex gap-2" role="tablist" aria-label="Installation method"><button id="install-tab-windows" role="tab" aria-selected="true" aria-controls="install-windows" data-install="windows"><svg class="icon icon-fill"><use href="#i-windows" /></svg>Windows</button><button id="install-tab-winget" role="tab" aria-selected="false" aria-controls="install-winget" data-install="winget" tabindex="-1"><span class="terminal-symbol" aria-hidden="true">&gt;_</span>WinGet</button></div>
-            <section id="install-windows" role="tabpanel" aria-labelledby="install-tab-windows" tabindex="0"><h3 id="download-heading">Still taking shape.</h3><p id="download-description">Download Cleanup.exe and open it. No installer, admin rights, or extra runtimes needed.</p><a class="text-link release-link" href="https://github.com/wiredincorp/cleanup/releases" data-releases>GitHub releases</a><a id="download-link" class="button" href="https://github.com/wiredincorp/cleanup/releases/download/v0.1.2-rc.1/Cleanup.exe">Download for Windows</a><a class="text-link setup-link" href="https://github.com/wiredincorp/cleanup/releases/download/v0.1.2-rc.1/cleanup-0.1.2-windows-x64-setup.exe" data-setup>Prefer an installer?</a><p id="download-footnote" class="install-footnote">Windows 11 x64. Unsigned preview: if Windows says “Windows protected your PC”, choose More info, then Run anyway.</p></section>
-            <section id="install-winget" role="tabpanel" aria-labelledby="install-tab-winget" tabindex="0" hidden><h3 id="winget-heading">Your terminal, too.</h3><p id="winget-description">WinGet release tooling is prepared. cleanup isn’t in the community repository yet; the install command will appear here once it is.</p><div class="command-line" hidden><code id="winget-command"></code><button class="icon-button" id="copy-winget" aria-label="Copy WinGet install command"><svg class="icon"><use href="#i-copy" /></svg></button></div><p id="copy-status" class="copy-status" role="status"></p><a class="text-link" href="/build-notes.html#winget">About WinGet availability</a><p class="install-footnote">No package ID has been registered.<br />No extra package source or local-manifest mode required for the planned public install.</p></section>
+      <section id="download" class="download-section scroll-target" aria-labelledby="download-title">
+        <div class="shell">
+          <div class="download-intro">
+            <p class="download-eyebrow">Downloads for Windows 11</p>
+            <h2 id="download-title">Choose how to run cleanup.</h2>
+            <p>Both preview downloads are for Windows 11 on x64 and include the files they need to run.</p>
           </div>
+          <div class="download-options grid gap-5 md:grid-cols-2">
+            <article class="download-card download-card--featured">
+              <p class="download-card-label">For your PC</p>
+              <h3>Install for Windows</h3>
+              <p>Set up cleanup for your Windows account. The installer adds a Start menu entry and an uninstaller.</p>
+              <a class="button download-button" href="https://github.com/wiredincorp/cleanup/releases/download/v0.1.2-rc.1/cleanup-0.1.2-windows-x64-setup.exe" data-setup><svg class="icon icon-fill" aria-hidden="true"><use href="#i-windows" /></svg>Install for Windows</a>
+              <p class="download-file">Windows 11 x64 setup</p>
+            </article>
+            <article class="download-card">
+              <p class="download-card-label">For removable storage</p>
+              <h3>Portable for USB</h3>
+              <p>Copy Cleanup.exe to a USB drive and run it on a Windows 11 x64 PC. The first launch unpacks support files to a temporary folder.</p>
+              <a class="button button-secondary download-button" href="https://github.com/wiredincorp/cleanup/releases/download/v0.1.2-rc.1/Cleanup.exe" data-download><svg class="icon" aria-hidden="true"><use href="#i-folder" /></svg>Portable for USB</a>
+              <p class="download-file">One Cleanup.exe file</p>
+            </article>
+          </div>
+          <aside class="download-warning" aria-labelledby="download-warning-title">
+            <svg class="icon" aria-hidden="true"><use href="#i-info" /></svg>
+            <div><h3 id="download-warning-title">A note about Windows security</h3><p>These preview downloads are unsigned. Windows SmartScreen may show “Windows protected your PC.” Choose More info, then Run anyway. Smart App Control or a work or school policy can block unsigned apps completely.</p></div>
+          </aside>
+          <a class="text-link release-link" href="https://github.com/wiredincorp/cleanup/releases/tag/v0.1.2-rc.1" data-releases>View release details and checksums <svg class="icon" aria-hidden="true"><use href="#i-arrow" /></svg></a>
         </div>
       </section>
 
@@ -211,14 +234,14 @@
           <details><summary>Will it touch files without asking?<span aria-hidden="true">+</span></summary><p>Folder moves require a preview and confirmation. You can deselect files before continuing. Subfolders, protected paths, links, hidden and system files, partial downloads, and online-only cloud files are preserved. Existing files are never silently overwritten.</p></details>
           <details><summary>Can I undo everything?<span aria-hidden="true">+</span></summary><p>Undo applies to eligible file moves, not application uninstalls. A file must be unchanged and its original path must be available. History shows the result when a file can’t be restored.</p></details>
           <details><summary>Is this a registry cleaner or a PC booster?<span aria-hidden="true">+</span></summary><p>No. cleanup focuses on removing applications, reviewing their leftovers, and organizing folders. It doesn’t promise performance boosts, automatically debloat Windows, or run a background cleanup service.</p></details>
-          <details><summary>What do I need to run it?<span aria-hidden="true">+</span></summary><p>The current development build targets Windows 11 on x64. ARM64, macOS, and Linux builds aren’t available. See the development notes for source build prerequisites and local signing instructions.</p></details>
-          <details><summary>Can I install it with WinGet?<span aria-hidden="true">+</span></summary><p id="winget-faq">Not yet. Release manifest tooling is included, but a public installer and registered package ID are still needed. Once the package is published, the WinGet tab above will show its exact install command.</p></details>
+          <details><summary>Can I run the portable app from a USB drive?<span aria-hidden="true">+</span></summary><p>Yes. Copy Cleanup.exe to a USB drive and run it on a Windows 11 x64 PC. The first launch unpacks support files into a temporary folder. Settings and history stay in your Windows account.</p></details>
+          <details><summary>What do I need to run it?<span aria-hidden="true">+</span></summary><p>This preview targets Windows 11 on x64. The required runtime files are included, so you don’t need a separate runtime installation.</p></details>
           <details><summary>Is cleanup open source?<span aria-hidden="true">+</span></summary><p id="source-faq">Yes. cleanup is MIT licensed. Browse the source and report issues on GitHub.</p></details>
         </div>
       </section>
     </main>
 
-    <footer class="site-footer shell flex flex-wrap items-center justify-between gap-6"><a class="brand flex items-center gap-2.5" href="#"><img src="/logo.svg" alt="" width="22" height="22" /><span>cleanup</span></a><p>A little less. A little better.</p><div class="flex items-center gap-6"><a href="/build-notes.html">Build notes</a><a href="https://github.com/wiredincorp/cleanup" data-repository>GitHub</a><a href="https://discord.gg/5kRtCcNWU6" data-discord>Discord support</a><a href="/LICENSE.txt">MIT license</a><span>©(wired-in) community</span></div></footer>
+    <footer class="site-footer shell flex flex-wrap items-center justify-between gap-6"><a class="brand flex items-center gap-2.5" href="#"><img src="/logo.svg" alt="" width="22" height="22" /><span>cleanup</span></a><p>A little less. A little better.</p><div class="flex items-center gap-6"><a href="/build-notes.html">Download help</a><a href="https://github.com/wiredincorp/cleanup" data-repository>GitHub</a><a href="https://discord.gg/5kRtCcNWU6" data-discord>Discord support</a><a href="/LICENSE.txt">MIT license</a><span>©(wired-in) community</span></div></footer>
 
     <dialog id="selection-dialog" aria-labelledby="dialog-title"><div class="dialog-content"><h2 id="dialog-title">You’re in control.</h2><p>In cleanup, you review your selection before any official uninstaller runs.</p><ul id="dialog-selection"></ul><p class="dialog-note">This is example data. This website can’t remove applications or access your files.</p><form method="dialog"><button class="button">Back to the preview</button></form></div></dialog>
   </body>

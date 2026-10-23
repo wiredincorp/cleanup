@@ -7,8 +7,10 @@
   "scripts": {
     "dev": "bun --bun vite",
     "check": "bun --bun tsc -p tsconfig.json && bun --bun tsc -p tsconfig.bun.json",
+    "check:copy": "bun scripts/check-copy.ts",
+    "check:copy:dist": "bun scripts/check-copy.ts --dist",
     "test": "bun test",
-    "build": "bun run check && bun --bun vite build",
+    "build": "bun run check && bun run check:copy && bun --bun vite build && bun run check:copy:dist",
     "preview": "bun --bun vite preview",
     "winget:prepare": "bun scripts/winget.ts"
   },

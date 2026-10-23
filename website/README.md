@@ -16,14 +16,14 @@ bun run build      # check + static output in dist/
 ## Release links
 
 Public GitHub, Discord, and production-site links come from `../release.json`,
-shared with the Windows app. The preview uses a setup EXE and portable ZIP. WinGet
-remains unavailable until a package is accepted. Environment variables can override
-the defaults:
+shared with the Windows app. Its download links point to a per-user setup EXE and a
+single-file portable Cleanup.exe. Environment variables can override the defaults:
 
 | Variable | Effect |
 | --- | --- |
-| `VITE_DOWNLOAD_URL` | Turns the Windows tab into a download button. Must be `https://`. |
-| `VITE_PORTABLE_URL` | Shows the portable ZIP download beside the installer. |
+| `VITE_PORTABLE_URL` | Overrides the portable Cleanup.exe download. Must be `https://`. |
+| `VITE_DOWNLOAD_URL` | Legacy alias for `VITE_PORTABLE_URL`. |
+| `VITE_SETUP_URL` | Overrides the per-user Windows setup download. Must be `https://`. |
 | `VITE_REPOSITORY_URL` | Shows the source links in the footer and the open-source section. |
 | `VITE_WINGET_ID` | Shows `winget install --id <id> --exact --source winget` with a copy button. |
 | `VITE_DISCORD_URL` | Overrides the Discord support invite. |

@@ -3,7 +3,7 @@
 
 export type SiteConfig = {
   repositoryUrl: string | null;
-  downloadUrl: string | null;
+  portableUrl: string | null;
   wingetId: string | null;
   discordUrl: string | null;
   siteUrl: string | null;
@@ -12,6 +12,7 @@ export type SiteConfig = {
 };
 
 type Env = Readonly<Record<string, string | undefined>>;
+type Defaults = Partial<Record<keyof SiteConfig, string>> & { downloadUrl?: string };
 
 // WinGet identifiers are Publisher.Package with optional extra segments.
 const WINGET_ID = /^[^.\s\\/:*?"<>|]{1,32}(\.[^.\s\\/:*?"<>|]{1,32}){1,7}$/;
@@ -32,10 +33,10 @@ export function wingetId(value: string | undefined): string | null {
   return trimmed && WINGET_ID.test(trimmed) ? trimmed : null;
 }
 
-export function readConfig(env: Env, defaults: Partial<Record<keyof SiteConfig, string>> = {}): SiteConfig {
+export function readConfig(env: Env, defaults: Defaults = {}): SiteConfig {
   return {
     repositoryUrl: httpsUrl(env.VITE_REPOSITORY_URL ?? defaults.repositoryUrl),
-    downloadUrl: httpsUrl(env.VITE_DOWNLOAD_URL ?? defaults.downloadUrl),
+    portableUrl: httpsUrl(env.VITE_PORTABLE_URL ?? env.VITE_DOWNLOAD_URL ?? defaults.portableUrl ?? defaults.downloadUrl),
     wingetId: wingetId(env.VITE_WINGET_ID),
     discordUrl: discordInvite(env.VITE_DISCORD_URL ?? defaults.discordUrl),
     siteUrl: httpsUrl(env.VITE_SITE_URL ?? defaults.siteUrl),
@@ -60,8 +61,8 @@ export function latestReleaseUrl(repository: string | null): string | null {
 }
 
 export function releasePageUrl(config: SiteConfig): string | null {
-  if (config.downloadUrl) {
-    const url = new URL(config.downloadUrl);
+  if (config.portableUrl) {
+    const url = new URL(config.portableUrl);
     const match = url.pathname.match(/^(\/[^/]+\/[^/]+\/releases)\/download\/([^/]+)\/[^/]+$/);
     if (url.hostname === 'github.com' && match) return `${url.origin}${match[1]}/tag/${match[2]}`;
   }

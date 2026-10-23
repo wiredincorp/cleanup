@@ -3,10 +3,11 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#fcfbfe" />
-    <meta name="description" content="Build notes, release status, and WinGet availability for cleanup, a native Windows 11 app." />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#f5f6f7" />
+    <meta name="description" content="What to expect when installing cleanup or running its portable Windows 11 version." />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <title>Build notes — cleanup</title>
+    <title>Download help | cleanup</title>
     <script>
       try { const t = localStorage.getItem('cleanup-theme'); if (t === 'dark' || (!t && matchMedia('(prefers-color-scheme: dark)').matches)) document.documentElement.dataset.theme = 'dark'; } catch {}
       if (!matchMedia('(prefers-reduced-motion: reduce)').matches && 'IntersectionObserver' in window) {
@@ -15,8 +16,8 @@
       }
     </script>
     <style>
-      html { background: #fcfbfe; color-scheme: light; }
-      html[data-theme="dark"] { background: #17151e; color-scheme: dark; }
+      html { background: #f5f6f7; color-scheme: light; }
+      html[data-theme="dark"] { background: #1b1b1b; color-scheme: dark; }
       html[data-motion="pending"] main { opacity: 0; }
       html[data-motion="pending"] .site-header .brand > :first-child { opacity: 0; }
     </style>
@@ -35,58 +36,41 @@
       <header class="site-header shell flex items-center justify-between gap-5">
         <a class="brand flex items-center gap-2.5" href="/" aria-label="cleanup home"><img src="/logo.svg" alt="" width="26" height="26" /><span>cleanup</span></a>
         <div class="flex items-center gap-3">
-          <button class="theme-toggle icon-button" type="button" aria-label="Switch to dark theme"><svg class="icon"><use href="#i-moon" /></svg></button>
-          <a class="button button-small" href="/">Back to cleanup</a>
+          <button class="theme-toggle icon-button" type="button" aria-label="Switch to dark theme"><svg class="icon" aria-hidden="true"><use href="#i-moon" /></svg></button>
+          <a class="button button-small" href="/">Home</a>
         </div>
       </header>
     </div>
 
     <main id="main" class="docs-main">
-      <h1>Build notes</h1>
-      <p>cleanup is a native Windows 11 app built with C#, .NET 10, and WinUI 3, with a Rust library for discovery, uninstall, and file operations. It is a development build, not a production release.</p>
+      <p class="download-eyebrow">Download help</p>
+      <h1>Choose the download that fits.</h1>
+      <p>Both current preview downloads are for Windows 11 on x64 and include the files they need to run.</p>
 
-      <div class="docs-notice"><p>The source is on <a href="https://github.com/wiredincorp/cleanup">GitHub</a>. The preview is a single portable Cleanup.exe, with a per-user setup EXE as an alternative. Both include .NET and WinUI; no Visual C++ redistributable is needed. Production signing and WinGet publication are still being prepared.</p></div>
+      <aside class="docs-notice download-warning" aria-labelledby="security-title">
+        <svg class="icon" aria-hidden="true"><use href="#i-info" /></svg>
+        <div><h2 id="security-title">A note about Windows security</h2><p>These preview downloads are unsigned. Windows SmartScreen may show “Windows protected your PC.” Choose More info, then Run anyway. Smart App Control or a work or school policy can block unsigned apps completely.</p></div>
+      </aside>
 
-      <h2>Release status</h2>
-      <ul>
-        <li>Signed MSIX installation and fixture workflows pass on the development machine.</li>
-        <li>Clean-machine release certification and production signing are pending.</li>
-        <li>Memory use is above the original target, so the project makes no performance claims.</li>
-        <li>Windows 11 x64 only. ARM64, macOS, and Linux builds are not planned for the first release.</li>
-      </ul>
+      <section aria-labelledby="install-title">
+        <h2 id="install-title">Install for Windows</h2>
+        <p>Run the setup file to install cleanup for your Windows account. It adds a Start menu entry and an uninstaller.</p>
+        <a class="button" href="https://github.com/wiredincorp/cleanup/releases/download/v0.1.2-rc.1/cleanup-0.1.2-windows-x64-setup.exe" data-setup>Install for Windows</a>
+      </section>
 
-      <h2>Build from source</h2>
-      <p>Install .NET SDK 10.0.402 or a later .NET 10 SDK, Rust 1.99.0 (MSVC), Visual Studio 2022 C++ Build Tools, Windows SDK 10.0.26100.0, and PowerShell 7. From the repository root:</p>
-      <pre><code>. .\scripts\env.ps1
-.\scripts\verify-core.ps1
-.\scripts\package-dev.ps1</code></pre>
+      <section aria-labelledby="portable-title">
+        <h2 id="portable-title">Portable for USB</h2>
+        <p>Copy Cleanup.exe to a USB drive and run it on a Windows 11 x64 PC. On first launch, it unpacks support files to a temporary folder. Settings and history stay in your Windows account.</p>
+        <a class="button button-secondary" href="https://github.com/wiredincorp/cleanup/releases/download/v0.1.2-rc.1/Cleanup.exe" data-download>Portable for USB</a>
+      </section>
 
-      <h3>Install a development build</h3>
-      <p>Trust the public development signer once from an <strong>elevated</strong> PowerShell, then install from a normal one:</p>
-      <pre><code># Elevated, once
-.\packaging\Trust-DevCertificate.ps1
-
-# Normal PowerShell
-.\scripts\install-dev.ps1 -Mode Msix</code></pre>
-      <p>Remove development trust later with <code>.\packaging\Trust-DevCertificate.ps1 -Remove</code>.</p>
-
-      <h2 id="winget">WinGet</h2>
-      <p>cleanup isn’t in the WinGet community repository yet. The desktop preview is available directly from GitHub Releases. WinGet publication and production signing are still being prepared.</p>
-      <p>The repository includes an optional MSIX manifest generator. It needs adapting for the new EXE installer before a desktop package can be submitted to <code>winget-pkgs</code>:</p>
-      <pre><code>cd website
-bun run winget:prepare --id Publisher.Cleanup --version 1.0.0 \
-  --url https://example.com/cleanup-1.0.0-x64.msix \
-  --file ..\artifacts\release\cleanup-1.0.0-x64.msix \
-  --publisher "cleanup contributors"
-
-winget validate --manifest winget-output\manifests\p\Publisher\Cleanup\1.0.0
-winget install --manifest winget-output\manifests\p\Publisher\Cleanup\1.0.0</code></pre>
-      <p>Validate and test-install locally, then submit the folder as a pull request to <a href="https://github.com/microsoft/winget-pkgs">microsoft/winget-pkgs</a>. Once the package is accepted, set <code>VITE_WINGET_ID</code> and the WinGet tab on the home page shows the install command.</p>
-
-      <h2>Updates and support</h2><p>Download Cleanup.exe and open it: no installer, admin rights, MSIX registration, or certificate import. The first launch unpacks its support files into your temp folder, so it opens faster after that. Prefer a Start menu entry and uninstaller? Use the setup EXE instead. Settings and history stay in your user profile either way. To update, replace Cleanup.exe or run a newer setup; Settings → Check for updates tells you when one is out. Because the preview is unsigned, Windows may say “Windows protected your PC”; choose More info, then Run anyway. Windows 11 x64 is the verified target; ARM64 through x64 emulation has not been tested, and macOS/Linux builds are unavailable.</p><p>Find downloads on <a href="https://github.com/wiredincorp/cleanup/releases" data-releases>GitHub Releases</a>, or get help in <a href="https://discord.gg/5kRtCcNWU6" data-discord>Discord</a>.</p><h2>What cleanup won’t do</h2>
-      <p>It isn’t a registry cleaner, a PC booster, or a debloater. It doesn’t run in the background. Uninstalls always use the application’s official uninstaller after you confirm the list, and leftovers get their own review with nothing preselected.</p>
+      <section aria-labelledby="release-title">
+        <h2 id="release-title">Release details</h2>
+        <p>See the release notes, checksums, and current support options on GitHub.</p>
+        <a class="text-link" href="https://github.com/wiredincorp/cleanup/releases/tag/v0.1.2-rc.1" data-releases>View release details <span aria-hidden="true">↗</span></a>
+      </section>
     </main>
 
-    <footer class="site-footer shell flex flex-wrap items-center justify-between gap-6"><a class="brand flex items-center gap-2.5" href="/"><img src="/logo.svg" alt="" width="22" height="22" /><span>cleanup</span></a><p>A little less. A little better.</p><div class="flex items-center gap-6"><a href="/">Home</a><a href="/build-notes.html" aria-current="page">Build notes</a><a href="https://github.com/wiredincorp/cleanup" data-repository>GitHub</a><a href="https://discord.gg/5kRtCcNWU6" data-discord>Discord support</a><a href="/LICENSE.txt">MIT license</a><span>©(wired-in) community</span></div></footer>
+    <footer class="site-footer shell flex flex-wrap items-center justify-between gap-6"><a class="brand flex items-center gap-2.5" href="/"><img src="/logo.svg" alt="" width="22" height="22" /><span>cleanup</span></a><p>A little less. A little better.</p><div class="flex items-center gap-6"><a href="/" aria-current="page">Home</a><a href="/build-notes.html">Download help</a><a href="https://github.com/wiredincorp/cleanup" data-repository>GitHub</a><a href="https://discord.gg/5kRtCcNWU6" data-discord>Discord support</a><a href="/LICENSE.txt">MIT license</a><span>©(wired-in) community</span></div></footer>
   </body>
 </html>
