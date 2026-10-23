@@ -75,5 +75,31 @@ foreach ($binary in Get-ChildItem $extractDirectory -Recurse -File -Include *.dl
         throw "$($binary.Name) depends on the Visual C++ redistributable ($($Matches[0]))."
     }
 }
-Write-Output 'Passed: direct Cleanup.exe first launch from a path with spaces, fresh self-extraction of WinUI/Windows App SDK/Rust files, no Visual C++ redistributable dependency, adjacent portable data, inventory scan, and disposable file move/undo.'
+# Browsers save a repeat download as "Cleanup (1).exe". WinUI must still find
+# the app's resources when the executable has a different name.
+$renamedDirectory = Join-Path $run 'Renamed download'
+New-Item -ItemType Directory -Path $renamedDirectory -Force | Out-Null
+$renamedExe = Join-Path $renamedDirectory 'Cleanup (1).exe'
+Copy-Item -LiteralPath $exe -Destination $renamedExe
+$renamedReport = Join-Path $run 'renamed-launch.json'
+try {
+    $env:DOTNET_BUNDLE_EXTRACT_BASE_DIR = $extractBase
+    $renamed = Start-Process -FilePath $renamedExe -ArgumentList @(
+        '--selftest', '--report', ('"' + $renamedReport + '"'), '--fixture-dir', ('"' + (Join-Path $run 'renamed-moves') + '"'),
+        '--local-app-data-root', ('"' + $localAppDataRoot + '"')
+    ) -WindowStyle Hidden -PassThru
+} finally {
+    if ($null -eq $previousExtractBase) { Remove-Item Env:DOTNET_BUNDLE_EXTRACT_BASE_DIR -ErrorAction SilentlyContinue }
+    else { $env:DOTNET_BUNDLE_EXTRACT_BASE_DIR = $previousExtractBase }
+}
+if (-not $renamed.WaitForExit(60000)) {
+    Stop-Process -Id $renamed.Id -Force -ErrorAction SilentlyContinue
+    throw 'The renamed portable copy timed out during startup.'
+}
+if (-not (Test-Path $renamedReport)) { throw "The renamed portable copy did not start (exit $($renamed.ExitCode))." }
+$renamedResult = Get-Content $renamedReport -Raw | ConvertFrom-Json
+if ($renamedResult.fatal -or $renamedResult.process.startupToWindowLoadedMs -le 0) {
+    throw 'The renamed portable copy failed to load its window.'
+}
+Write-Output 'Passed: direct Cleanup.exe first launch from a path with spaces, fresh self-extraction of WinUI/Windows App SDK/Rust files, no Visual C++ redistributable dependency, adjacent portable data, inventory scan, disposable file move/undo, and launch as a renamed download.'
 Write-Output "Private verification report: $reportPath"
