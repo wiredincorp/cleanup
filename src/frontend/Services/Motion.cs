@@ -67,6 +67,9 @@ internal static class Motion
     private static void ConfigureShowHide(UIElement element, float rise)
     {
         Visual visual = ElementCompositionPreview.GetElementVisual(element);
+        // Translation must be enabled before it is read, stopped or reset, even
+        // when animations are off; otherwise XAML rejects the element at startup.
+        ElementCompositionPreview.SetIsTranslationEnabled(element, true);
         if (!Enabled)
         {
             ElementCompositionPreview.SetImplicitShowAnimation(element, null);
@@ -80,7 +83,6 @@ internal static class Motion
             return;
         }
         Compositor compositor = visual.Compositor;
-        ElementCompositionPreview.SetIsTranslationEnabled(element, true);
 
         ScalarKeyFrameAnimation fadeIn = compositor.CreateScalarKeyFrameAnimation();
         fadeIn.Target = "Opacity";
@@ -111,6 +113,7 @@ internal static class Motion
     public static void Enter(UIElement element, float rise = DefaultRise, TimeSpan delay = default)
     {
         Visual visual = ElementCompositionPreview.GetElementVisual(element);
+        ElementCompositionPreview.SetIsTranslationEnabled(element, true);
         if (!Enabled)
         {
             visual.StopAnimation(nameof(Visual.Opacity));
@@ -120,7 +123,6 @@ internal static class Motion
             return;
         }
         Compositor compositor = visual.Compositor;
-        ElementCompositionPreview.SetIsTranslationEnabled(element, true);
         visual.Opacity = 0;
         visual.Properties.InsertVector3("Translation", new Vector3(0, rise, 0));
 

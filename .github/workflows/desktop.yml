@@ -30,17 +30,17 @@ jobs:
           rustup toolchain install $pin --profile minimal --component clippy,rustfmt --target x86_64-pc-windows-msvc
           if ($LASTEXITCODE -ne 0) { throw 'Rust installation failed.' }
       - name: Build portable EXE and self-contained setup
-        run: ./scripts/package-desktop.ps1 -Version 0.1.2
+        run: ./scripts/package-desktop.ps1 -Version 0.1.5
       - name: Verify per-user setup install and uninstall
-        run: ./scripts/verify-desktop-installer.ps1 -Version 0.1.2
+        run: ./scripts/verify-desktop-installer.ps1 -Version 0.1.5
       - name: Verify portable first launch
-        run: ./scripts/verify-portable.ps1 -Version 0.1.2 -AllowElevated
+        run: ./scripts/verify-portable.ps1 -Version 0.1.5 -AllowElevated
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: cleanup-desktop-x64
           if-no-files-found: error
           path: |
-            artifacts/desktop/0.1.2/Cleanup.exe
-            artifacts/desktop/0.1.2/*-setup.exe
-            artifacts/desktop/0.1.2/Cleanup-Notices.zip
-            artifacts/desktop/0.1.2/SHA256SUMS.txt
+            artifacts/desktop/0.1.5/Cleanup.exe
+            artifacts/desktop/0.1.5/*-setup.exe
+            artifacts/desktop/0.1.5/Cleanup-Notices.zip
+            artifacts/desktop/0.1.5/SHA256SUMS.txt

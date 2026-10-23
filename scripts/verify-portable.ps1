@@ -101,5 +101,43 @@ $renamedResult = Get-Content $renamedReport -Raw | ConvertFrom-Json
 if ($renamedResult.fatal -or $renamedResult.process.startupToWindowLoadedMs -le 0) {
     throw 'The renamed portable copy failed to load its window.'
 }
-Write-Output 'Passed: direct Cleanup.exe first launch from a path with spaces, fresh self-extraction of WinUI/Windows App SDK/Rust files, no Visual C++ redistributable dependency, adjacent portable data, inventory scan, disposable file move/undo, and launch as a renamed download.'
+# The self-test opens a test window, not the real one. Open the real main
+# window as a person would, with Windows animation effects both off and on:
+# PCs set for best performance, VMs and remote sessions turn them off.
+# Packaged developer builds use their own single-instance name, so only an
+# unpackaged copy would take the launch over.
+if (Get-Process -Name Cleanup -ErrorAction SilentlyContinue | Where-Object { $_.Path -notlike "$env:ProgramFiles\WindowsApps\*" }) {
+    throw 'Close Cleanup before verifying; a running copy would take this launch over.'
+}
+Add-Type -Namespace CleanupVerify -Name Spi -MemberDefinition @'
+[DllImport("user32.dll")] public static extern bool SystemParametersInfo(uint action, uint param, ref int value, uint flags);
+[DllImport("user32.dll")] public static extern bool SystemParametersInfo(uint action, uint param, IntPtr value, uint flags);
+'@
+$getAnimations = 0x1042; $setAnimations = 0x1043
+$originalAnimations = 0
+[void][CleanupVerify.Spi]::SystemParametersInfo($getAnimations, 0, [ref]$originalAnimations, 0)
+try {
+    foreach ($animations in 0, 1) {
+        [void][CleanupVerify.Spi]::SystemParametersInfo($setAnimations, 0, [IntPtr]$animations, 2)
+        $mainDirectory = Join-Path $run "Main window animations $animations"
+        New-Item -ItemType Directory -Path $mainDirectory -Force | Out-Null
+        $mainExe = Join-Path $mainDirectory 'Cleanup.exe'
+        Copy-Item -LiteralPath $exe -Destination $mainExe
+        $main = Start-Process -FilePath $mainExe -PassThru
+        try {
+            Start-Sleep -Seconds 15
+            $failure = Join-Path $mainDirectory 'CleanupData/last-error.txt'
+            if (Test-Path $failure) {
+                throw "The main window failed to open with animations $(('off', 'on')[$animations]):`n$(Get-Content $failure -Raw)"
+            }
+            if ($main.HasExited) { throw "The main window closed on its own with animations $(('off', 'on')[$animations]) (exit $($main.ExitCode))." }
+        } finally {
+            Stop-Process -Id $main.Id -Force -ErrorAction SilentlyContinue
+            $main.WaitForExit(10000) | Out-Null
+        }
+    }
+} finally {
+    [void][CleanupVerify.Spi]::SystemParametersInfo($setAnimations, 0, [IntPtr]$originalAnimations, 2)
+}
+Write-Output 'Passed: direct Cleanup.exe first launch from a path with spaces, fresh self-extraction of WinUI/Windows App SDK/Rust files, no Visual C++ redistributable dependency, adjacent portable data, inventory scan, disposable file move/undo, launch as a renamed download, and the real main window with animation effects off and on.'
 Write-Output "Private verification report: $reportPath"
