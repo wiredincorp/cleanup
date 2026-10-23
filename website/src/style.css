@@ -4,14 +4,14 @@
   --font-sans: "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
 }
 
-:root { font-family: var(--font-sans); color: #242629; background: #f7f8f7; font-synthesis: none; font-feature-settings: "calt" 0; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; --bg: #f7f8f7; --text: #242629; --muted: #60656b; --accent: #0067c0; --accent-strong: #005a9e; --focus-ring: #005a9e; --button-bg: #0067c0; --button-fg: #fff; --button-hover-bg: #005a9e; --button-active-bg: #004578; --button-secondary-bg: #fff; --button-secondary-hover-bg: #eff1f2; --button-secondary-active-bg: #e3e6e8; --button-secondary-fg: #242629; --button-secondary-border: #898f94; --button-secondary-hover-border: #747a80; --button-secondary-active-border: #60676d; --button-disabled-bg: #eceeef; --button-disabled-fg: #4b5054; --icon-hover-bg: #e9ebec; --tint: #f0f2f1; --line: #e4e6e5; --panel: #fff; --window: #f6f6f6; color-scheme: light; }
-:root[data-theme="dark"] { color-scheme: dark; color: #f3f3f3; background: #1b1b1b; --bg: #1b1b1b; --text: #f3f3f3; --muted: #c4c6c8; --accent: #60cdff; --accent-strong: #8bd8f7; --focus-ring: #9adcf9; --button-bg: #60cdff; --button-fg: #00344d; --button-hover-bg: #80d5fa; --button-active-bg: #a0e2fc; --button-secondary-bg: #303030; --button-secondary-hover-bg: #3d3d3d; --button-secondary-active-bg: #4a4a4a; --button-secondary-fg: #f3f3f3; --button-secondary-border: #707070; --button-secondary-hover-border: #858585; --button-secondary-active-border: #999999; --button-disabled-bg: #353535; --button-disabled-fg: #c0c0c0; --icon-hover-bg: #343434; --tint: #242424; --line: #3d3d3d; --panel: #242424; --window: #2b2b2b; }
+:root { font-family: var(--font-sans); color: #242629; background: #f7f8f7; font-synthesis: none; font-feature-settings: "calt" 0; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; --bg: #f7f8f7; --text: #242629; --muted: #60656b; --accent: #156b40; --accent-strong: #105a35; --focus-ring: #156b40; --button-bg: #156b40; --button-fg: #fff; --button-hover-bg: #105a35; --button-active-bg: #0b4729; --button-secondary-bg: #fff; --button-secondary-hover-bg: #eff1f2; --button-secondary-active-bg: #e3e6e8; --button-secondary-fg: #242629; --button-secondary-border: #898f94; --button-secondary-hover-border: #747a80; --button-secondary-active-border: #60676d; --button-disabled-bg: #eceeef; --button-disabled-fg: #4b5054; --icon-hover-bg: #e9ebec; --tint: #f0f2f1; --line: #e4e6e5; --panel: #fff; --window: #f6f6f6; color-scheme: light; }
+:root[data-theme="dark"] { color-scheme: dark; color: #f3f3f3; background: #1b1b1b; --bg: #1b1b1b; --text: #f3f3f3; --muted: #c4c6c8; --accent: #5ed492; --accent-strong: #8ee6b3; --focus-ring: #8ee6b3; --button-bg: #5ed492; --button-fg: #062e18; --button-hover-bg: #7ddfa6; --button-active-bg: #9de8bb; --button-secondary-bg: #303030; --button-secondary-hover-bg: #3d3d3d; --button-secondary-active-bg: #4a4a4a; --button-secondary-fg: #f3f3f3; --button-secondary-border: #707070; --button-secondary-hover-border: #858585; --button-secondary-active-border: #999999; --button-disabled-bg: #353535; --button-disabled-fg: #c0c0c0; --icon-hover-bg: #343434; --tint: #242424; --line: #3d3d3d; --panel: #242424; --window: #2b2b2b; }
 
 /* App preview: Windows 11 (WinUI 3) tokens, sampled from the app's own screenshots. */
 :root {
   --win-font: "Segoe UI Variable Text", "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
   --win-font-display: "Segoe UI Variable Display", "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
-  --win-mica: radial-gradient(90% 70% at 0% 0%, #e6e9ec 0, transparent 60%), radial-gradient(80% 60% at 100% 100%, #e4e5e4 0, transparent 60%), #f3f3f3;
+  --win-mica: radial-gradient(90% 70% at 0% 0%, #e5ebe7 0, transparent 60%), radial-gradient(80% 60% at 100% 100%, #e4e5e4 0, transparent 60%), #f3f3f3;
   --win-text: #1f1f1f;
   --win-text-2: #55575a;
   --win-stroke: #0000001a;
@@ -20,26 +20,26 @@
   --win-field-line: #77718a;
   --win-subtle: #0000000f;
   --win-hover: #00000018;
-  --win-selected: #0067c01c;
-  --win-accent: #0067c0;
+  --win-selected: #1a7a4a1c;
+  --win-accent: #1a7a4a;
   --win-accent-text: #ffffff;
-  --win-accent-ink: #005a9e;
-  --win-focus-ring: #005a9e;
+  --win-accent-ink: #156b40;
+  --win-focus-ring: #156b40;
   --win-button-bg: #f5f5f5;
   --win-button-hover: #eaeaea;
   --win-button-active: #dfdfdf;
   --win-button-disabled: #ededed;
   --win-button-disabled-text: #55575a;
-  --win-accent-hover: #005a9e;
-  --win-accent-active: #004578;
-  --win-accent-disabled: #dcebf4;
-  --win-accent-disabled-text: #34424a;
+  --win-accent-hover: #156b40;
+  --win-accent-active: #105a35;
+  --win-accent-disabled: #d9ecdf;
+  --win-accent-disabled-text: #2f4a3a;
   --win-success: #17703a;
   --win-shadow: 0 18px 40px -14px #34383b40, 0 0 0 1px #0000001f;
   --stage-ink: #5e646b;
 }
 :root[data-theme="dark"] {
-  --win-mica: radial-gradient(90% 70% at 0% 0%, #29323b 0, transparent 60%), radial-gradient(80% 60% at 100% 100%, #303436 0, transparent 60%), #242424;
+  --win-mica: radial-gradient(90% 70% at 0% 0%, #29332d 0, transparent 60%), radial-gradient(80% 60% at 100% 100%, #303436 0, transparent 60%), #242424;
   --win-text: #ffffff;
   --win-text-2: #d2d0da;
   --win-stroke: #ffffff17;
@@ -48,20 +48,20 @@
   --win-field-line: #9d98ab;
   --win-subtle: #ffffff14;
   --win-hover: #ffffff1f;
-  --win-selected: #60cdff30;
-  --win-accent: #60cdff;
-  --win-accent-text: #00344d;
-  --win-accent-ink: #9adcf9;
-  --win-focus-ring: #9adcf9;
+  --win-selected: #5ed49230;
+  --win-accent: #5ed492;
+  --win-accent-text: #062e18;
+  --win-accent-ink: #8ee6b3;
+  --win-focus-ring: #8ee6b3;
   --win-button-bg: #323232;
   --win-button-hover: #414141;
   --win-button-active: #4b4b4b;
   --win-button-disabled: #353535;
   --win-button-disabled-text: #c0c0c0;
-  --win-accent-hover: #80d5fa;
-  --win-accent-active: #a0e2fc;
-  --win-accent-disabled: #3e555f;
-  --win-accent-disabled-text: #d5e9f0;
+  --win-accent-hover: #7ddfa6;
+  --win-accent-active: #9de8bb;
+  --win-accent-disabled: #34503f;
+  --win-accent-disabled-text: #d3eadb;
   --win-success: #6ccb5f;
   --win-shadow: 0 18px 44px -12px #0009, 0 0 0 1px #ffffff17;
   --stage-ink: #c2c2c2;
@@ -79,7 +79,7 @@ button:disabled { cursor: default; }
 button, a { touch-action: manipulation; }
 :focus-visible { outline: 3px solid var(--focus-ring); outline-offset: 3px; }
 [hidden] { display: none !important; }
-::selection { background: #cfe4f7; color: #1a2834; }
+::selection { background: #cdebd8; color: #12301f; }
 .icon-definitions { position: absolute; width: 0; height: 0; overflow: hidden; }
 .icon, .feature-icon { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.65; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
 .icon-fill { fill: currentColor; stroke: none; }
@@ -320,7 +320,7 @@ dialog::backdrop { background: #17102177; backdrop-filter: blur(6px); }
 
 /* Dark theme details */
 [data-theme="dark"] .brand img { content: url('/logo-dark.svg'); }
-[data-theme="dark"] ::selection { background: #244a60; color: #f3f3f3; }
+[data-theme="dark"] ::selection { background: #24563a; color: #f3f3f3; }
 
 /* The preview becomes a tabbed workspace on narrow screens. */
 @container win (max-width: 520px) {
