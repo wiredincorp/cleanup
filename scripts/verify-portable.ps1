@@ -1,24 +1,32 @@
 param(
     [ValidatePattern('^\d+\.\d+\.\d+$')] [string] $Version = '0.1.2',
+    [string] $ExecutablePath,
     # Hosted CI runners always run as administrator; local checks must not.
     [switch] $AllowElevated
 )
 $ErrorActionPreference = 'Stop'
 $root = Split-Path $PSScriptRoot -Parent
-$exe = Join-Path $root "artifacts/desktop/$Version/Cleanup.exe"
+$exe = if ($ExecutablePath) { (Resolve-Path -LiteralPath $ExecutablePath).Path } else { Join-Path $root "artifacts/desktop/$Version/Cleanup.exe" }
 if (-not (Test-Path $exe)) { throw "Portable app was not found: $exe" }
 $run = Join-Path $root ('artifacts/portable-qa/' + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $run -Force | Out-Null
 $reportPath = Join-Path $run 'launch.json'
 $fixtures = Join-Path $run 'moves'
+$portableDirectory = Join-Path $run 'Portable copy with spaces'
+New-Item -ItemType Directory -Path $portableDirectory -Force | Out-Null
+$portableExe = Join-Path $portableDirectory 'Cleanup.exe'
+Copy-Item -LiteralPath $exe -Destination $portableExe
+# Keep the profile fallback isolated from the interactive user's real LocalAppData.
+$localAppDataRoot = Join-Path $run 'Local profile with spaces'
 # Extract into an empty directory so this run exercises a true first launch
 # rather than reusing a cached extraction under %TEMP%\.net.
-$extractBase = Join-Path $run 'extract'
+$extractBase = Join-Path $run 'Fresh extraction with spaces'
 $previousExtractBase = $env:DOTNET_BUNDLE_EXTRACT_BASE_DIR
 try {
     $env:DOTNET_BUNDLE_EXTRACT_BASE_DIR = $extractBase
-    $process = Start-Process -FilePath $exe -ArgumentList @(
-        '--selftest', '--report', ('"' + $reportPath + '"'), '--fixture-dir', ('"' + $fixtures + '"')
+    $process = Start-Process -FilePath $portableExe -ArgumentList @(
+        '--selftest', '--report', ('"' + $reportPath + '"'), '--fixture-dir', ('"' + $fixtures + '"'),
+        '--local-app-data-root', ('"' + $localAppDataRoot + '"')
     ) -WindowStyle Hidden -PassThru
 } finally {
     if ($null -eq $previousExtractBase) { Remove-Item Env:DOTNET_BUNDLE_EXTRACT_BASE_DIR -ErrorAction SilentlyContinue }
@@ -39,9 +47,15 @@ if ($report.process.startupToWindowLoadedMs -le 0 -or -not $report.inventory.sum
 if (-not $report.fileMoves.moved -or -not $report.fileMoves.movedBack -or -not $report.fileMoves.existingFileUnchanged) {
     throw 'Portable file move/undo storage verification failed.'
 }
-$expectedState = Join-Path $env:LOCALAPPDATA 'Cleanup'
+if (-not $report.process.portableSingleFile) {
+    throw 'The single-file download was not detected as the portable bundle.'
+}
+$expectedState = Join-Path $portableDirectory 'CleanupData'
 if ([IO.Path]::GetFullPath($report.process.localStateDirectory) -ne [IO.Path]::GetFullPath($expectedState)) {
-    throw 'Portable app data is not stored under the current user LocalAppData directory.'
+    throw 'Portable app data is not stored beside Cleanup.exe when that folder is writable.'
+}
+if (-not [IO.Path]::GetFullPath($report.persistence.journalPath).StartsWith([IO.Path]::GetFullPath($expectedState), [StringComparison]::OrdinalIgnoreCase)) {
+    throw 'Portable app persistence did not write inside its adjacent CleanupData folder.'
 }
 if ($report.nativeCore.environment.elevated -and -not $AllowElevated) { throw 'Portable app self-test unexpectedly ran elevated.' }
 # The .NET runtime is linked into the single-file host, so coreclr.dll is not
@@ -61,5 +75,5 @@ foreach ($binary in Get-ChildItem $extractDirectory -Recurse -File -Include *.dl
         throw "$($binary.Name) depends on the Visual C++ redistributable ($($Matches[0]))."
     }
 }
-Write-Output 'Passed: direct Cleanup.exe first launch, fresh self-extraction of WinUI/Windows App SDK/Rust files, no Visual C++ redistributable dependency, AppData state, inventory scan, and disposable file move/undo.'
+Write-Output 'Passed: direct Cleanup.exe first launch from a path with spaces, fresh self-extraction of WinUI/Windows App SDK/Rust files, no Visual C++ redistributable dependency, adjacent portable data, inventory scan, and disposable file move/undo.'
 Write-Output "Private verification report: $reportPath"

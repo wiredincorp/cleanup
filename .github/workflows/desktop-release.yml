@@ -63,11 +63,11 @@ jobs:
         run: |
           $out = "artifacts/desktop/$env:RELEASE_VERSION"
           $notes = @"
-          **Download ``Cleanup.exe`` and run it.** No installer, admin rights, or separate runtime needed. Prefer a Start menu entry and uninstaller? Use the setup EXE instead.
+          **Download ``Cleanup.exe`` and double-click it.** It runs as a normal user and includes its runtime. On first launch, Windows support files are extracted to the temporary folder.
 
-          This preview is unsigned. If Windows shows **"Windows protected your PC"**, choose **More info → Run anyway**.
+          Keep ``CleanupData`` beside ``Cleanup.exe`` to carry portable settings and history between PCs. If that folder is read-only, Cleanup uses the current user's profile instead. Prefer a Start menu shortcut? Use the per-user setup EXE.
 
-          Windows 11 x64. Settings and history live in ``%LOCALAPPDATA%\Cleanup``. Verify downloads with ``SHA256SUMS.txt`` or ``gh attestation verify Cleanup.exe --repo $env:GITHUB_REPOSITORY``.
+          Windows 11 x64. This unsigned preview may show an unknown-publisher warning. Some applications' official uninstallers may ask Windows for approval.
           "@
           gh release create $env:RELEASE_TAG --draft --prerelease --target $env:GITHUB_SHA `
             --title "cleanup $env:RELEASE_VERSION" --notes ($notes -replace '(?m)^ {10}', '') `

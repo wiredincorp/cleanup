@@ -82,7 +82,8 @@ if ($LASTEXITCODE -ne 0) { throw 'Setup EXE build failed.' }
 # Primary download: a compressed .NET single-file bundle. The .NET runtime host
 # is linked into Cleanup.exe; WinUI/Windows App SDK native files, PRI/XBF
 # resources, and the Rust core are extracted to %TEMP%\.net\Cleanup\<bundle id>
-# on first launch. App data stays in %LOCALAPPDATA%\Cleanup. WinUI generated
+# on first launch. Writable portable folders keep app data in CleanupData beside
+# the EXE; read-only locations fall back to %LOCALAPPDATA%\Cleanup. WinUI generated
 # intermediates differ for single-file builds, so reset them first; the extra
 # single-file tooling package is pinned in its own lock file.
 dotnet clean $project -c Release -p:Platform=x64 -p:CleanupDesktop=true

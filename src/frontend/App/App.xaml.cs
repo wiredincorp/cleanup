@@ -33,6 +33,11 @@ public partial class App : Application
     private void LaunchWindow()
     {
         var options = SelfTestOptions.Parse(Environment.GetCommandLineArgs());
+        if (options.Enabled && options.LocalAppDataRoot is { } localAppDataRoot)
+        {
+            AppEnvironment.ConfigureLocalAppDataRootForSelfTest(localAppDataRoot);
+        }
+
         if (!options.Enabled)
         {
             _instanceMutex = new Mutex(true, $"Local\\{AppEnvironment.InstanceName}.MainWindow", out bool ownsInstance);

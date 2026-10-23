@@ -36,6 +36,7 @@ internal sealed class FeasibilityRunner(SelfTestOptions options, nint ownerWindo
             ["process"] = new JsonObject
             {
                 ["packaged"] = AppEnvironment.IsPackaged,
+                ["portableSingleFile"] = AppEnvironment.IsPortableSingleFile,
                 ["packageFullName"] = AppEnvironment.PackageFullName,
                 ["installedPath"] = AppEnvironment.InstalledPath,
                 ["localStateDirectory"] = AppEnvironment.LocalStateDirectory,

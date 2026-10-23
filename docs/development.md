@@ -1,79 +1,34 @@
-# Development
+# Developer guide
 
-Build and test cleanup on Windows 11 x64. Run the commands below from the repository root.
+Cleanup is an open-source Windows 11 x64 application. The repository includes
+the WinUI frontend, Rust core, and scripts for creating the portable download
+and optional per-user setup.
 
-## Build on Windows x64
+## Build and verify
 
-Install .NET SDK 10.0.402 or a compatible later .NET 10 SDK, Rust 1.99.0 MSVC,
-Visual Studio 2022 C++ Build Tools, and Windows SDK 10.0.26100.0.
-PowerShell 7 is required for the repository scripts.
+Use Windows 11 x64 with the .NET 10 SDK, the Rust toolchain pinned in
+`rust-toolchain.toml`, Visual Studio C++ Build Tools, Windows SDK
+10.0.26100.0, and PowerShell 7. From the repository root:
 
 ```powershell
 . .\scripts\env.ps1
 .\scripts\verify-core.ps1
-.\scripts\package-dev.ps1
-```
-
-If NuGet connections from .NET are blocked on the development machine, use
-`scripts\package-dev.ps1 -UseLocalFeed`. It downloads packages from nuget.org
-with PowerShell and restores through a local feed. It is a development fallback,
-not a general NuGet resolver or release build workflow.
-
-## Desktop portable and installer build
-
-The public preview is a portable self-contained `Cleanup.exe`, with a per-user
-setup EXE as fallback:
-
-```powershell
 .\scripts\package-desktop.ps1 -Version 0.1.2
 .\scripts\verify-portable.ps1 -Version 0.1.2
-.\scripts\verify-desktop-installer.ps1 -Version 0.1.2
+.\scripts\verify-portable-locations.ps1 -Version 0.1.2
 ```
 
-Outputs are in `artifacts/desktop/0.1.2`: `Cleanup.exe`, the setup EXE,
-`Cleanup-Notices.zip`, and `SHA256SUMS.txt`. The portable build is a .NET
-single-file bundle and uses `src/frontend/packages.portable.lock.json`, because
-single-file publishing adds the ILLink tasks package to the restore graph.
-The pinned Inno compiler is downloaded and hash-checked automatically. Both
-downloads include their runtimes and require no MSIX registration or certificate
-import. Portable verification extracts into a disposable directory; installer
-verification installs into one and uninstalls afterward, refusing to run over an
-existing desktop installation. See [launch and updates](launch.md) for limits and release steps.
+The package script creates a single-file `Cleanup.exe` and a per-user Setup
+EXE. Both include .NET and Windows App SDK / WinUI and do not need a separate
+Visual C++ redistributable. The portable EXE extracts native support files to
+the user's temporary cache on first launch. Its settings and history go in
+`CleanupData` beside the EXE when writable, with a per-user profile fallback
+when the portable folder is read-only. Setup stores settings and history in
+`%LOCALAPPDATA%\Cleanup`.
 
-## Optional MSIX development install
+Run the location check from a standard, non-elevated account. It checks paths
+with spaces, data migration, write-denied fallback, and a removable drive when
+one is attached.
 
-For a real signed development MSIX install, first run this one-time setup in an
-**elevated** PowerShell. It trusts the public development signer for all machine
-users; the private key remains in the current user's store.
-
-```powershell
-.\packaging\Trust-DevCertificate.ps1
-```
-
-Then return to a **normal, unelevated** PowerShell:
-
-```powershell
-.\scripts\install-dev.ps1 -Mode Msix
-.\scripts\phase0-feasibility.ps1 -RequireSignedPackage
-```
-
-The fixture harness installs and uninstalls its own per-user Win32, MSI, and MSIX
-fixtures. Optional `-IncludeElevated` adds a per-machine fixture and requires human
-UAC approval during setup, uninstall, and cleanup. Use disposable Windows environments
-for this elevated integration run. The harness never approves UAC automatically.
-
-Developer Mode provides a separate diagnostic path:
-
-```powershell
-.\scripts\install-dev.ps1 -Mode Register
-.\scripts\phase0-feasibility.ps1
-cleanup-dev.exe
-```
-
-Registration explicitly skips signed-install validation and uses a writable layout.
-Switching from registration to a signed install removes the old development package
-and its development state. Ordinary signed package updates preserve state.
-
-When development trust is no longer needed, run `packaging\Trust-DevCertificate.ps1 -Remove`
-from elevated PowerShell. The public certificate is under `artifacts\packaging`;
-no private certificate is exported. Do not distribute development builds as releases.
+See [download and updates](launch.md) for the end-user behavior. Internal
+development tooling is kept in `scripts/` and `packaging/`.

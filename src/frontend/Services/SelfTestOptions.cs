@@ -8,6 +8,7 @@ internal sealed record SelfTestOptions(
     bool Enabled,
     string? ReportPath,
     string? FixtureDirectory,
+    string? LocalAppDataRoot,
     bool UninstallFixtures,
     bool AllowElevation)
 {
@@ -31,6 +32,7 @@ internal sealed record SelfTestOptions(
             Enabled: Flag("--selftest"),
             ReportPath: Value("--report"),
             FixtureDirectory: Value("--fixture-dir"),
+            LocalAppDataRoot: Value("--local-app-data-root"),
             UninstallFixtures: Flag("--uninstall-fixtures"),
             AllowElevation: Flag("--allow-elevation"));
     }
