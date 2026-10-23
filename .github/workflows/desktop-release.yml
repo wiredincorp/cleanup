@@ -50,6 +50,8 @@ jobs:
         run: ./scripts/verify-core.ps1
       - name: Build portable EXE and setup
         run: ./scripts/package-desktop.ps1 -Version $env:RELEASE_VERSION
+      - name: Verify per-user setup install and uninstall
+        run: ./scripts/verify-desktop-installer.ps1 -Version $env:RELEASE_VERSION
       - name: Verify portable first launch
         run: ./scripts/verify-portable.ps1 -Version $env:RELEASE_VERSION -AllowElevated
       - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8
