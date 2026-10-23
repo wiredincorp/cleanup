@@ -180,7 +180,7 @@ function applyTheme(dark: boolean) {
   document.documentElement.dataset.theme = dark ? 'dark' : 'light';
   themeIcon?.setAttribute('href', dark ? '#i-sun' : '#i-moon');
   themeToggle?.setAttribute('aria-label', dark ? 'Switch to light theme' : 'Switch to dark theme');
-  themeColor?.setAttribute('content', dark ? '#1b1b1b' : '#f5f6f7');
+  themeColor?.setAttribute('content', dark ? '#1b1b1b' : '#f7f8f7');
 }
 
 applyTheme(document.documentElement.dataset.theme === 'dark');
