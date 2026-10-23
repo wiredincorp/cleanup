@@ -2,7 +2,7 @@
   "repositoryUrl": "https://github.com/wiredincorp/cleanup",
   "discordUrl": "https://discord.gg/5kRtCcNWU6",
   "siteUrl": "https://cleanup-wiredin.vercel.app",
-  "downloadUrl": "https://github.com/wiredincorp/cleanup/releases/download/v0.1.4-rc.1/Cleanup.exe",
-  "setupUrl": "https://github.com/wiredincorp/cleanup/releases/download/v0.1.4-rc.1/cleanup-0.1.4-windows-x64-setup.exe",
+  "downloadUrl": "https://github.com/wiredincorp/cleanup/releases/download/v0.1.5-rc.1/Cleanup.exe",
+  "setupUrl": "https://github.com/wiredincorp/cleanup/releases/download/v0.1.5-rc.1/cleanup-0.1.5-windows-x64-setup.exe",
   "appInstallerUrl": ""
 }
