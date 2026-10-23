@@ -2,9 +2,9 @@
 
 ## Windows downloads
 
-**[Download Cleanup.exe](https://github.com/wiredincorp/cleanup/releases/download/v0.1.3-rc.1/Cleanup.exe)** and double-click it. It runs as a standard user and includes its runtime. The supported target is Windows 11 x64.
+**[Download Cleanup.exe](https://github.com/wiredincorp/cleanup/releases/download/v0.1.4-rc.1/Cleanup.exe)** and double-click it. It runs as a standard user and includes its runtime. The supported target is Windows 11 x64.
 
-For a Start menu shortcut and uninstaller, use the [per-user setup EXE](https://github.com/wiredincorp/cleanup/releases/download/v0.1.3-rc.1/cleanup-0.1.3-windows-x64-setup.exe).
+For a Start menu shortcut and uninstaller, use the [per-user setup EXE](https://github.com/wiredincorp/cleanup/releases/download/v0.1.4-rc.1/cleanup-0.1.4-windows-x64-setup.exe).
 
 ## Portable use
 
