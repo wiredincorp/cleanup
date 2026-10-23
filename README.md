@@ -24,13 +24,13 @@ Made with WinUI 3 and Rust, with light and dark themes that feel at home on Wind
 
 ## Download for Windows
 
-**[Download Cleanup.exe](https://github.com/wiredincorp/cleanup/releases/download/v0.1.2-rc.1/Cleanup.exe)** and double-click it. The app normally runs without administrator access or a separate runtime install. Its first launch takes a little longer while Windows support files are extracted to your temporary files folder.
+**[Download Cleanup.exe](https://github.com/wiredincorp/cleanup/releases/download/v0.1.3-rc.1/Cleanup.exe)** and double-click it. It runs as a standard user and includes its runtime. On first launch, Windows support files are extracted to a temporary folder.
 
-For a Start menu shortcut and an uninstaller, use the [setup EXE](https://github.com/wiredincorp/cleanup/releases/download/v0.1.2-rc.1/cleanup-0.1.2-windows-x64-setup.exe). Some applications' official uninstallers may ask Windows for approval.
+For a Start menu shortcut and an uninstaller, use the [setup EXE](https://github.com/wiredincorp/cleanup/releases/download/v0.1.3-rc.1/cleanup-0.1.3-windows-x64-setup.exe). Some applications' official uninstallers may ask Windows for approval.
 
-Windows 11 x64. This unsigned preview may show an unknown-publisher warning. The currently linked `v0.1.2-rc.1` keeps settings and history in `%LOCALAPPDATA%\Cleanup`. USB data portability is being added for the next portable build: it will keep data in a `CleanupData` folder beside `Cleanup.exe` when writable, or use your profile if that location is read-only.
+Windows 11 x64. For USB portability, keep `Cleanup.exe` and its `CleanupData` folder together to carry settings and history between PCs. If that location is read-only, Cleanup uses your Windows profile instead. This unsigned preview may show an unknown-publisher warning.
 
-To update, use **Settings → Check for updates**, then replace `Cleanup.exe` (and keep `CleanupData` beside it in portable builds that support USB data). ARM64 emulation is unverified; macOS/Linux builds are unavailable.
+To update, use Settings > Check for updates, then replace `Cleanup.exe` and keep `CleanupData` beside it. ARM64 emulation is unverified; macOS/Linux builds are unavailable.
 
 Open-source source and developer build notes are in the [development guide](docs/development.md).
 
