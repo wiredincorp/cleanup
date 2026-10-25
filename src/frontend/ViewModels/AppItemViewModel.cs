@@ -40,6 +40,8 @@ public sealed partial class AppItemViewModel : ObservableObject
         InstallDate = DateOnly.TryParseExact(record.InstallDate, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateOnly date) ? date : null;
         DriveRoot = InstallDriveRoot(record.InstallLocation);
         DriveText = DriveRoot?.TrimEnd('\\') ?? "Not reported";
+        ListSubtitle = PublisherText;
+        ActivityColumnText = DateText;
     }
 
     public AppRecord Record { get; }
@@ -69,11 +71,62 @@ public sealed partial class AppItemViewModel : ObservableObject
 
     public string PublisherText => string.IsNullOrWhiteSpace(Record.Publisher) ? "Unknown publisher" : Record.Publisher;
 
+    /// <summary>Publisher under the app name.</summary>
+    [ObservableProperty]
+    public partial string ListSubtitle { get; set; } = "";
+
+    /// <summary>Install date, or Running / the last run date while that sort is selected.</summary>
+    [ObservableProperty]
+    public partial string ActivityColumnText { get; set; } = "";
+
+    internal bool IsRunningNow { get; private set; }
+
+    internal DateTime? LastRan { get; private set; }
+
+    internal int RunRank { get; private set; } = 2;
+
+    internal void ApplyRunState(bool show, bool running, DateTime? lastRan)
+    {
+        IsRunningNow = show && running;
+        LastRan = show ? lastRan : null;
+        RunRank = !show ? 2 : running ? 0 : lastRan is DateTime when && when >= DateTime.Now - RecentActivity.RecentWindow ? 1 : 2;
+        if (ListSubtitle != PublisherText)
+        {
+            ListSubtitle = PublisherText;
+        }
+        string column = DateText;
+        if (show)
+        {
+            column = running ? "Running" : lastRan is DateTime ran ? ran.ToString("d", CultureInfo.CurrentCulture) : "";
+        }
+        if (ActivityColumnText != column)
+        {
+            ActivityColumnText = column;
+        }
+    }
+
     public string VersionText => Record.Version ?? "Not reported";
 
-    public string SizeText => FormatSize(Record.EstimatedSizeBytes) ?? "";
+    private ulong? _measuredSize;
 
-    public string SizeDetail => FormatSize(Record.EstimatedSizeBytes) ?? "Not reported";
+    /// <summary>Installer-reported size, or the size of the install folder once that has been added up.</summary>
+    public ulong? ShownBytes => _measuredSize ?? Record.EstimatedSizeBytes;
+
+    public string SizeText => FormatSize(ShownBytes) ?? "";
+
+    public string SizeDetail => FormatSize(ShownBytes) ?? "Not reported";
+
+    internal void SetMeasuredSize(ulong bytes)
+    {
+        if (bytes == 0 || Record.EstimatedSizeBytes is not null)
+        {
+            return;
+        }
+        _measuredSize = bytes;
+        OnPropertyChanged(nameof(ShownBytes));
+        OnPropertyChanged(nameof(SizeText));
+        OnPropertyChanged(nameof(SizeDetail));
+    }
 
     public string DateText => InstallDate?.ToString("d", CultureInfo.CurrentCulture) ?? "";
 

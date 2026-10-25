@@ -21,6 +21,10 @@ public sealed class AppRecord
     public string? PackageFullName { get; init; }
     public string? PackageFamilyName { get; init; }
 
+    /// <summary>When a store or game library recorded a launch. Not part of the native inventory.</summary>
+    [JsonIgnore]
+    public DateTime? LastRun { get; init; }
+
     [JsonIgnore]
     public string Summary =>
         string.Join("  ·  ", new[] { Publisher, Version, $"{Technology} ({Scope})" }.Where(s => !string.IsNullOrEmpty(s)));

@@ -29,6 +29,10 @@ public sealed partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        if (App.IsAdministrator)
+        {
+            AdminButton.Visibility = Visibility.Collapsed;
+        }
         ExtendsContentIntoTitleBar = true;
         SetTitleBar(TitleDragRegion);
         AppWindow.TitleBar.PreferredHeightOption = TitleBarHeightOption.Tall;
@@ -106,6 +110,51 @@ public sealed partial class MainWindow : Window
     }
 
     private void OnAccentClick(object sender, RoutedEventArgs e) => OpenSettings();
+
+    private async void OnRunAsAdminClick(object sender, RoutedEventArgs e)
+    {
+        var dialog = new ContentDialog
+        {
+            Title = "Run as administrator",
+            Content = new StackPanel
+            {
+                Spacing = 12,
+                MaxWidth = 440,
+                Children =
+                {
+                    new TextBlock
+                    {
+                        TextWrapping = TextWrapping.Wrap,
+                        Text = "Running as administrator lets cleanup read more of this PC.\n\n"
+                            + "More install folders can be measured, including many Store apps, so more sizes show up.\n\n"
+                            + "Windows’ activity log can be read, so last-run dates include programs a normal account cannot see.\n\n"
+                            + "Uninstallers cleanup starts also run as administrator, so removals that need approval do not ask again.",
+                    },
+                    new CheckBox
+                    {
+                        Content = "Always run this app as administrator",
+                        IsChecked = SettingsService.Current.RunAsAdministrator,
+                    },
+                },
+            },
+            PrimaryButtonText = "Restart as administrator",
+            CloseButtonText = "Not now",
+            DefaultButton = ContentDialogButton.Close,
+            XamlRoot = RootGrid.XamlRoot,
+            RequestedTheme = RootGrid.ActualTheme,
+            Style = (Style)Application.Current.Resources["DefaultContentDialogStyle"],
+        };
+        if (dialog.Content is StackPanel panel && panel.Children.OfType<CheckBox>().FirstOrDefault() is CheckBox always)
+        {
+            always.Checked += (_, _) => SettingsService.Remember(settings => settings.RunAsAdministrator = true);
+            always.Unchecked += (_, _) => SettingsService.Remember(settings => settings.RunAsAdministrator = false);
+        }
+        if (await dialog.ShowAsync() != ContentDialogResult.Primary)
+        {
+            return;
+        }
+        App.RestartElevated();
+    }
     internal void PreviewMaterial()
     {
         if (SystemBackdrop is TintedAcrylicBackdrop acrylic) acrylic.Update(SettingsService.Current, PrefersDark());
@@ -134,6 +183,7 @@ public sealed partial class MainWindow : Window
             "organize" => typeof(OrganizePage),
             "photos" => typeof(PhotosPage),
             "videos" => typeof(VideosPage),
+            "folders" => typeof(FoldersPage),
             "history" => typeof(HistoryPage),
             _ => typeof(ApplicationsPage),
         });
@@ -146,6 +196,13 @@ public sealed partial class MainWindow : Window
         Navigate(typeof(SettingsPage));
     }
 
+    private void OnPatchNotesClick(object sender, RoutedEventArgs e)
+    {
+        Nav.SelectedIndex = -1;
+        SettingsNav.SelectedIndex = -1;
+        Navigate(typeof(PatchNotesPage));
+    }
+
     private async void Navigate(Type page) => await NavigateAsync(page);
 
     private async Task NavigateAsync(Type page)
@@ -156,6 +213,7 @@ public sealed partial class MainWindow : Window
         TitleBrand.Visibility = credits ? Visibility.Collapsed : Visibility.Visible;
         TitleBackButton.Visibility = credits ? Visibility.Visible : Visibility.Collapsed;
         AppearanceButton.Visibility = credits ? Visibility.Collapsed : Visibility.Visible;
+        AdminButton.Visibility = credits || App.IsAdministrator ? Visibility.Collapsed : Visibility.Visible;
         Grid.SetColumn(ContentFrame, credits ? 0 : 1);
         Grid.SetColumnSpan(ContentFrame, credits ? 2 : 1);
         SelectionPanel.Visibility = page == typeof(ApplicationsPage) ? Visibility.Visible : Visibility.Collapsed;

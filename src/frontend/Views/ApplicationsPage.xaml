@@ -74,7 +74,7 @@
                 ToolTipService.ToolTip="Show apps of one type" />
             <ComboBox
                 Grid.Column="2"
-                MinWidth="120"
+                MinWidth="156"
                 AutomationProperties.Name="Sort applications"
                 ItemsSource="{x:Bind vm:ApplicationsViewModel.SortOptions}"
                 SelectedIndex="{x:Bind ViewModel.SortIndex, Mode=TwoWay}"
@@ -168,13 +168,13 @@
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="110" />
                             <ColumnDefinition Width="72" />
-                            <ColumnDefinition Width="88" />
+                            <ColumnDefinition Width="104" />
                             <ColumnDefinition Width="130" />
                         </Grid.ColumnDefinitions>
                         <Button Grid.Column="1" Style="{StaticResource ColumnHeaderStyle}" Content="{x:Bind ViewModel.NameSortHeader, Mode=OneWay}" Tag="0" Click="OnColumnSortClick" AutomationProperties.Name="Sort by name" ToolTipService.ToolTip="Sort by name; click again to reverse" />
                         <Button Grid.Column="2" Style="{StaticResource ColumnHeaderStyle}" Content="{x:Bind ViewModel.TypeSortHeader, Mode=OneWay}" Tag="4" Click="OnColumnSortClick" AutomationProperties.Name="Sort by type" ToolTipService.ToolTip="Sort by type; click again to reverse" />
-                        <Button Grid.Column="3" HorizontalContentAlignment="Right" Style="{StaticResource ColumnHeaderStyle}" Content="{x:Bind ViewModel.SizeSortHeader, Mode=OneWay}" Tag="2" Click="OnColumnSortClick" AutomationProperties.Name="Sort by size" ToolTipService.ToolTip="Sort by size; click again to reverse" />
-                        <Button Grid.Column="4" HorizontalContentAlignment="Right" Style="{StaticResource ColumnHeaderStyle}" Content="{x:Bind ViewModel.InstalledSortHeader, Mode=OneWay}" Tag="3" Click="OnColumnSortClick" AutomationProperties.Name="Sort by installed date" ToolTipService.ToolTip="Sort by install date; click again to reverse" />
+                        <Button Grid.Column="3" HorizontalContentAlignment="Right" Style="{StaticResource ColumnHeaderStyle}" Content="{x:Bind ViewModel.SizeSortHeader, Mode=OneWay}" Tag="2" Click="OnColumnSortClick" AutomationProperties.Name="Sort by size" ToolTipService.ToolTip="Sort by size. In Recently running this keeps that list and reverses between largest and smallest." />
+                        <Button Grid.Column="4" HorizontalContentAlignment="Right" Style="{StaticResource ColumnHeaderStyle}" Content="{x:Bind ViewModel.InstalledSortHeader, Mode=OneWay}" Tag="3" Click="OnColumnSortClick" AutomationProperties.Name="Sort by installed date or last run" ToolTipService.ToolTip="Install date. In Recently running this keeps that list and reverses between latest and oldest." />
                         <Button Grid.Column="5" Style="{StaticResource ColumnHeaderStyle}" Content="{x:Bind ViewModel.DriveSortHeader, Mode=OneWay}" Tag="5" Click="OnColumnSortClick" AutomationProperties.Name="Sort by drive" ToolTipService.ToolTip="Sort by drive; click again to reverse" />
                     </Grid>
 
@@ -226,7 +226,7 @@
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="110" />
                                         <ColumnDefinition Width="72" />
-                                        <ColumnDefinition Width="88" />
+                                        <ColumnDefinition Width="104" />
                                         <ColumnDefinition Width="130" />
                                     </Grid.ColumnDefinitions>
 
@@ -250,7 +250,7 @@
                                         <TextBlock
                                             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                             Style="{StaticResource CaptionTextBlockStyle}"
-                                            Text="{x:Bind PublisherText}"
+                                            Text="{x:Bind ListSubtitle, Mode=OneWay}"
                                             TextTrimming="CharacterEllipsis"
                                             TextWrapping="NoWrap" />
                                     </StackPanel>
@@ -266,14 +266,15 @@
                                         VerticalAlignment="Center"
                                         Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                         Style="{StaticResource CaptionTextBlockStyle}"
-                                        Text="{x:Bind SizeText}" />
+                                        Text="{x:Bind SizeText, Mode=OneWay}" />
                                     <TextBlock
                                         Grid.Column="4"
                                         HorizontalAlignment="Right"
                                         VerticalAlignment="Center"
                                         Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                         Style="{StaticResource CaptionTextBlockStyle}"
-                                        Text="{x:Bind DateText}" />
+                                        Text="{x:Bind ActivityColumnText, Mode=OneWay}"
+                                        ToolTipService.ToolTip="{x:Bind ActivityColumnText, Mode=OneWay}" />
                                     <TextBlock
                                         Grid.Column="5"
                                         VerticalAlignment="Center"

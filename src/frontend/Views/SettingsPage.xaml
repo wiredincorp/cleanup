@@ -108,6 +108,21 @@
                 </StackPanel>
             </Grid>
 
+            <TextBlock Style="{StaticResource SectionStyle}" Text="Administrator" />
+            <Grid Style="{StaticResource SettingCardStyle}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <FontIcon VerticalAlignment="Center" Glyph="&#xE7EF;" />
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <TextBlock Text="Always run as administrator" />
+                    <TextBlock Style="{StaticResource DescriptionStyle}" Text="Turn this off if it was enabled by accident. The next time cleanup opens, it starts as a normal account. This session stays as it is." />
+                </StackPanel>
+                <ToggleSwitch x:Name="AdminToggle" Grid.Column="2" Width="40" MinWidth="0" HorizontalAlignment="Right" VerticalAlignment="Center" OnContent="" OffContent="" AutomationProperties.Name="Always run as administrator" Toggled="OnAdminToggled" />
+            </Grid>
+
             <TextBlock Style="{StaticResource SectionStyle}" Text="Details" />
             <Grid Style="{StaticResource SettingCardStyle}">
                 <Grid.ColumnDefinitions>

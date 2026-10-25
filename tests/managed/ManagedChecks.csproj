@@ -10,5 +10,8 @@
     <Compile Include="../../src/frontend/Services/SingleFlight.cs" Link="SingleFlight.cs" />
     <Compile Include="../../src/frontend/Services/ReleaseVersion.cs" Link="ReleaseVersion.cs" />
     <Compile Include="../../src/frontend/Services/UpdateCheck.cs" Link="UpdateCheck.cs" />
+    <Compile Include="../../src/frontend/Services/RecentActivity.cs" Link="RecentActivity.cs" />
+    <Compile Include="../../src/frontend/Services/InstallSize.cs" Link="InstallSize.cs" />
+    <Compile Include="../../src/frontend/Services/FolderScan.cs" Link="FolderScan.cs" />
   </ItemGroup>
 </Project>

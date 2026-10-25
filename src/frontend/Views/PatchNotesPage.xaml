@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="Cleanup.Views.PatchNotesPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Page.Resources>
+        <Style x:Key="GroupStyle" BasedOn="{StaticResource SubtitleTextBlockStyle}" TargetType="TextBlock">
+            <Setter Property="Margin" Value="0,28,0,4" />
+        </Style>
+        <Style x:Key="TopicStyle" BasedOn="{StaticResource BodyStrongTextBlockStyle}" TargetType="TextBlock">
+            <Setter Property="Margin" Value="0,16,0,6" />
+        </Style>
+        <Style x:Key="NoteStyle" BasedOn="{StaticResource BodyTextBlockStyle}" TargetType="TextBlock">
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="Margin" Value="0,0,0,8" />
+        </Style>
+    </Page.Resources>
+
+    <ScrollViewer>
+        <StackPanel Padding="24,16,24,32" Spacing="0" MaxWidth="720" HorizontalAlignment="Left">
+            <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="Patch notes" />
+            <TextBlock Margin="0,4,0,0" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Everything added and fixed in this copy of cleanup, on top of 0.1.6." TextWrapping="Wrap" />
+
+            <TextBlock Style="{StaticResource GroupStyle}" Text="Added" />
+
+            <TextBlock Style="{StaticResource TopicStyle}" Text="Recently running" />
+            <TextBlock Style="{StaticResource NoteStyle}" Text="A Recently running sort. The same apps stay in the list." />
+            <TextBlock Style="{StaticResource NoteStyle}" Text="Programs that are open say Running." />
+            <TextBlock Style="{StaticResource NoteStyle}" Text="The others show the date they last ran." />
+            <TextBlock Style="{StaticResource NoteStyle}" Text="While that sort is selected, the date column is labeled Last run. Other sorts still show the install date." />
+            <TextBlock Style="{StaticResource NoteStyle}" Text="Press Last run to flip between newest and oldest. The arrow changes, and the sort stays on Recently running." />
+            <TextBlock Style="{StaticResource NoteStyle}" Text="Press Size during Recently running to sort largest first, then smallest, without leaving that view. Apps with no size stay at the bottom." />
+            <TextBlock Style="{StaticResource NoteStyle}" Text="Last run is read from Windows history." />
+            <TextBlock Style="{StaticResource NoteStyle}" Text="Last run is also read from the administrator activity log. Windows asks once. The result is kept for 12 hours." />
+            <TextBlock Style="{StaticResource NoteStyle}" Text="Store apps use Windows last-use data. Xbox is included." />
+            <TextBlock Style="{StaticResource NoteStyle}" Text="Steam games use Steam’s last played time." />
+            <TextBlock Style="{StaticResource NoteStyle}" Text="Epic games match when that game’s program was started." />
+
+            <TextBlock Style="{StaticResource TopicStyle}" Text="Sizes" />
+            <TextBlock Style="{StaticResource NoteStyle}" Text="If an installer never recorded a size, Cleanup adds up that app’s own folder." />
+            <TextBlock Style="{StaticResource NoteStyle}" Text="Those measured sizes are included in the total at the top." />
+
+            <TextBlock Style="{StaticResource TopicStyle}" Text="The app list" />
+            <TextBlock Style="{StaticResource NoteStyle}" Text="More installed programs are shown, including NVIDIA pieces and Visual C++." />
+            <TextBlock Style="{StaticResource NoteStyle}" Text="Installs with no uninstall command stay visible. Remove stays off for those." />
+
+            <TextBlock Style="{StaticResource TopicStyle}" Text="Administrator" />
+            <TextBlock Style="{StaticResource NoteStyle}" Text="Run as administrator is at the top right. It explains what elevation adds." />
+            <TextBlock Style="{StaticResource NoteStyle}" Text="It can restart cleanup elevated so more folders and last-run records can be read." />
+            <TextBlock Style="{StaticResource NoteStyle}" Text="Always run this app as administrator makes later opens start elevated." />
+            <TextBlock Style="{StaticResource NoteStyle}" Text="Settings has a switch for that option, so it can be turned off. The next open is a normal account. The current window stays as it is." />
+
+            <TextBlock Style="{StaticResource TopicStyle}" Text="Folders" />
+            <TextBlock Style="{StaticResource NoteStyle}" Text="Folders is in the sidebar." />
+            <TextBlock Style="{StaticResource NoteStyle}" Text="The scan reads one folder at a time." />
+            <TextBlock Style="{StaticResource NoteStyle}" Text="A folder appears with its name, path, and size as soon as that folder is finished." />
+            <TextBlock Style="{StaticResource NoteStyle}" Text="Later folders appear under the ones already shown." />
+            <TextBlock Style="{StaticResource NoteStyle}" Text="Search finds folders and files by name." />
+            <TextBlock Style="{StaticResource NoteStyle}" Text="Name, Path, and Size each sort both ways and stay on the folder and search you are using." />
+            <TextBlock Style="{StaticResource NoteStyle}" Text="Back is beside the title. The mouse back button goes back too." />
+            <TextBlock Style="{StaticResource NoteStyle}" Text="Scan in background keeps the scan going while any other page is open. Press it again to turn that off. The scan keeps running, and pressing it again turns background mode back on without starting over." />
+            <TextBlock Style="{StaticResource NoteStyle}" Text="Windows, Recovery, Boot, EFI, System Volume Information, the recycle bin, WindowsApps, Windows Defender, Windows NT, and the page, hibernation, and swap files are left out." />
+            <TextBlock Style="{StaticResource NoteStyle}" Text="Scan log shows drives, skipped paths, and counted sizes. The same text is saved as folder-scan.log." />
+            <TextBlock Style="{StaticResource NoteStyle}" Text="Open opens the selected folder in Explorer. Rescan starts the scan over." />
+
+            <TextBlock Style="{StaticResource TopicStyle}" Text="Patch notes" />
+            <TextBlock Style="{StaticResource NoteStyle}" Text="Patch notes is above Settings." />
+
+            <TextBlock Style="{StaticResource GroupStyle}" Text="Fixed" />
+
+            <TextBlock Style="{StaticResource TopicStyle}" Text="Last run" />
+            <TextBlock Style="{StaticResource NoteStyle}" Text="Install folders saved with a trailing slash match the program inside them." />
+            <TextBlock Style="{StaticResource NoteStyle}" Text="Apps registered as uninstall.exe, such as Steam and MSI Afterburner, match the program you actually open." />
+            <TextBlock Style="{StaticResource NoteStyle}" Text="Store apps match when Windows puts a version number in the folder name. Xbox was showing as never run because of that." />
+            <TextBlock Style="{StaticResource NoteStyle}" Text="A program matches when its file or folder name is the app’s name, including Brave and Edge." />
+            <TextBlock Style="{StaticResource NoteStyle}" Text="Shortcut targets are followed." />
+            <TextBlock Style="{StaticResource NoteStyle}" Text="Setup programs, uninstallers, and other generic helper names do not get the wrong last-run date." />
+            <TextBlock Style="{StaticResource NoteStyle}" Text="Emulator games are not given the emulator’s last-run time." />
+
+            <TextBlock Style="{StaticResource TopicStyle}" Text="Sizes" />
+            <TextBlock Style="{StaticResource NoteStyle}" Text="Folder sizes do not follow links or junctions." />
+            <TextBlock Style="{StaticResource NoteStyle}" Text="Shared locations such as Program Files, Downloads, and your profile are not totaled as one app." />
+            <TextBlock Style="{StaticResource NoteStyle}" Text="A folder that takes too long still keeps the size counted so far." />
+
+            <TextBlock Style="{StaticResource TopicStyle}" Text="The app list" />
+            <TextBlock Style="{StaticResource NoteStyle}" Text="Windows updates and patches stay off the list." />
+            <TextBlock Style="{StaticResource NoteStyle}" Text="Microsoft system pieces with no uninstaller stay off the list." />
+            <TextBlock Style="{StaticResource NoteStyle}" Text="Microsoft system pieces in the Windows folder stay off the list." />
+            <TextBlock Style="{StaticResource NoteStyle}" Text="Edge WebView2 stays off the list." />
+            <TextBlock Style="{StaticResource NoteStyle}" Text="The application compatibility database stays off the list." />
+            <TextBlock Style="{StaticResource NoteStyle}" Text="The servicing stack stays off the list." />
+            <TextBlock Style="{StaticResource NoteStyle}" Text="Built-in Windows packages stay off the list." />
+            <TextBlock Style="{StaticResource NoteStyle}" Text="Visual C++, the .NET runtimes, and the Windows SDK stay on the list." />
+        </StackPanel>
+    </ScrollViewer>
+</Page>

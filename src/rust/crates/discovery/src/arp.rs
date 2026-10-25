@@ -11,7 +11,7 @@ use serde::Serialize;
 use crate::msi::MsiProduct;
 use crate::registry::{RawUninstallEntry, display_path};
 
-/// Why an entry is not shown, mirroring what Windows Settings hides.
+/// Why an entry is not shown.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub enum SkipReason {
@@ -21,11 +21,13 @@ pub enum SkipReason {
     NoUninstallCommand,
 }
 
+/// Installed items stay visible. Windows components that cannot be removed,
+/// and patches of another product, stay hidden.
 pub fn classify(entry: &RawUninstallEntry) -> Result<(), SkipReason> {
     if entry.display_name.is_none() {
         return Err(SkipReason::NoDisplayName);
     }
-    if entry.system_component == Some(1) {
+    if is_protected_windows(entry) {
         return Err(SkipReason::SystemComponent);
     }
     let is_update_release = entry.release_type.as_deref().is_some_and(|kind| {
@@ -35,10 +37,46 @@ pub fn classify(entry: &RawUninstallEntry) -> Result<(), SkipReason> {
     if entry.parent_key_name.is_some() || is_update_release {
         return Err(SkipReason::UpdateOrPatch);
     }
-    if entry.uninstall_string.is_none() && entry.windows_installer != Some(1) {
-        return Err(SkipReason::NoUninstallCommand);
-    }
     Ok(())
+}
+
+fn is_microsoft(publisher: Option<&str>) -> bool {
+    publisher.is_some_and(|name| name.to_ascii_lowercase().contains("microsoft"))
+}
+
+fn in_windows_dir(location: &str) -> bool {
+    let location = location.trim().trim_matches('"').to_ascii_lowercase();
+    location.contains(r"\windows\") || location.ends_with(r"\windows")
+}
+
+/// Windows pieces the system needs: no uninstaller, installed under the Windows
+/// directory, or a known OS runtime that other Windows features load.
+/// Visual C++ runtimes and the Windows SDK are not in this set.
+fn is_protected_windows(entry: &RawUninstallEntry) -> bool {
+    if entry
+        .display_name
+        .as_deref()
+        .is_some_and(is_os_infrastructure)
+    {
+        return true;
+    }
+    if entry.system_component != Some(1) || !is_microsoft(entry.publisher.as_deref()) {
+        return false;
+    }
+    let cannot_remove = entry.no_remove == Some(1)
+        || (entry.uninstall_string.is_none() && entry.windows_installer != Some(1));
+    let in_windows = entry
+        .install_location
+        .as_deref()
+        .is_some_and(in_windows_dir);
+    cannot_remove || in_windows
+}
+
+fn is_os_infrastructure(name: &str) -> bool {
+    let name = name.to_ascii_lowercase();
+    name.contains("edge webview")
+        || name.contains("application compatibility fix database")
+        || name.contains("servicing stack")
 }
 
 /// Product code for entries Windows Installer manages: the key name is the
@@ -176,9 +214,29 @@ mod tests {
         no_name.display_name = None;
         assert_eq!(classify(&no_name), Err(SkipReason::NoDisplayName));
 
-        let mut system = entry("A");
-        system.system_component = Some(1);
-        assert_eq!(classify(&system), Err(SkipReason::SystemComponent));
+        let mut third_party = entry("A");
+        third_party.system_component = Some(1);
+        third_party.publisher = Some("NVIDIA Corporation".into());
+        assert_eq!(classify(&third_party), Ok(()));
+
+        let mut windows = entry("A");
+        windows.system_component = Some(1);
+        windows.publisher = Some("Microsoft Corporation".into());
+        windows.uninstall_string = None;
+        assert_eq!(classify(&windows), Err(SkipReason::SystemComponent));
+
+        let mut webview = entry("WebView");
+        webview.display_name = Some("Microsoft Edge WebView2 Runtime".into());
+        webview.system_component = Some(1);
+        webview.publisher = Some("Microsoft Corporation".into());
+        webview.no_remove = Some(1);
+        assert_eq!(classify(&webview), Err(SkipReason::SystemComponent));
+
+        let mut runtime = entry("VC");
+        runtime.display_name = Some("Microsoft Visual C++ 2022 X64 Runtime".into());
+        runtime.system_component = Some(1);
+        runtime.publisher = Some("Microsoft Corporation".into());
+        assert_eq!(classify(&runtime), Ok(()));
 
         let mut child = entry("A");
         child.parent_key_name = Some("Parent".into());
@@ -190,7 +248,8 @@ mod tests {
 
         let mut no_command = entry("A");
         no_command.uninstall_string = None;
-        assert_eq!(classify(&no_command), Err(SkipReason::NoUninstallCommand));
+        no_command.publisher = Some("Some Publisher".into());
+        assert_eq!(classify(&no_command), Ok(()));
 
         assert_eq!(classify(&entry("A")), Ok(()));
     }

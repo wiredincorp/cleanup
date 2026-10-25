@@ -10,7 +10,7 @@ Select-CleanupUi Applications
 Set-CleanupUiText 'Search apps' ''
 $deadline = [DateTime]::UtcNow.AddSeconds(5)
 do {
-    $apps = @(Find-CleanupUi -Name '*' -Type ListItem | Where-Object { $_.Current.Name -notin @('Applications','Organize','History','Settings') })
+    $apps = @(Find-CleanupUi -Name '*' -Type ListItem | Where-Object { $_.Current.Name -notin @('Core','Applications','Organize','Photos','Videos','Folders','History','Settings','Patch notes') })
     if ($apps.Count -ge 2) { break }
     Start-Sleep -Milliseconds 100
 } while ([DateTime]::UtcNow -lt $deadline)

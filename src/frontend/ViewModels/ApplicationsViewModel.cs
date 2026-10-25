@@ -6,6 +6,7 @@ using Cleanup.Interop;
 using Cleanup.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml.Controls;
 
 namespace Cleanup.ViewModels;
@@ -19,6 +20,11 @@ public sealed partial class ApplicationsViewModel : ObservableObject
     private CancellationTokenSource? _removalCancellation;
     private IReadOnlyDictionary<string, string> _driveNames = new Dictionary<string, string>();
     private int _driveScan;
+    private int _activityScan;
+    private bool _backgroundDeclined;
+    private bool _recentBySize;
+    private string? _backgroundLog;
+    private RecentActivity.Snapshot _activity = RecentActivity.Snapshot.Empty;
 
     public static ApplicationsViewModel Shared { get; } = new();
 
@@ -29,7 +35,7 @@ public sealed partial class ApplicationsViewModel : ObservableObject
 
     public static IReadOnlyList<string> TypeFilters { get; } = ["All apps", "Desktop apps", "Windows Installer", "Store apps", "Games"];
 
-    public static IReadOnlyList<string> SortOptions { get; } = ["Name", "Publisher", "Size", "Install date", "Type", "Drive"];
+    public static IReadOnlyList<string> SortOptions { get; } = ["Name", "Publisher", "Size", "Install date", "Type", "Drive", "Recently running"];
 
     [ObservableProperty]
     public partial ObservableCollection<AppItemViewModel> Items { get; set; } = [];
@@ -57,14 +63,67 @@ public sealed partial class ApplicationsViewModel : ObservableObject
 
     public string NameSortHeader => SortHeader(0, "Name");
     public string TypeSortHeader => SortHeader(4, "Type");
-    public string SizeSortHeader => SortHeader(2, "Size");
-    public string InstalledSortHeader => SortHeader(3, "Installed");
+    public string SizeSortHeader => SortIndex == 6 && _recentBySize
+        ? $"Size {(SortDescending ? "↓" : "↑")}"
+        : SortHeader(2, "Size");
+    public string InstalledSortHeader => SortIndex == 6 && !_recentBySize
+        ? $"Last run {(SortDescending ? "↓" : "↑")}"
+        : SortIndex == 6 ? "Last run" : SortHeader(3, "Installed");
     public string DriveSortHeader => SortHeader(5, "Drive");
 
     private string SortHeader(int column, string label) => SortIndex == column ? $"{label} {(SortDescending ? "↓" : "↑")}" : label;
 
     public void SortByColumn(int column)
     {
+        // Size reorders the recently-run list without leaving that view.
+        if (SortIndex == 6 && column == 2)
+        {
+            if (!_recentBySize)
+            {
+                _recentBySize = true;
+                if (!SortDescending)
+                {
+                    SortDescending = true;
+                }
+                else
+                {
+                    ApplyView();
+                }
+            }
+            else
+            {
+                SortDescending = !SortDescending;
+            }
+            NotifySortHeaders();
+            return;
+        }
+        // Last run flips newest and oldest without leaving Recently running.
+        if (SortIndex == 6 && column == 3)
+        {
+            if (_recentBySize)
+            {
+                _recentBySize = false;
+                if (!SortDescending)
+                {
+                    SortDescending = true;
+                }
+                else
+                {
+                    ApplyView();
+                }
+            }
+            else
+            {
+                SortDescending = !SortDescending;
+            }
+            NotifySortHeaders();
+            return;
+        }
+        if (_recentBySize)
+        {
+            _recentBySize = false;
+            NotifySortHeaders();
+        }
         if (column == SortIndex) SortDescending = !SortDescending;
         else SortIndex = column;
     }
@@ -144,8 +203,8 @@ public sealed partial class ApplicationsViewModel : ObservableObject
     {
         get
         {
-            ulong bytes = (ulong)_selection.Sum(i => (decimal)(i.Record.EstimatedSizeBytes ?? 0));
-            string size = AppItemViewModel.FormatSize(bytes) is { } s ? $"{s} reported by installers. " : "";
+            ulong bytes = (ulong)_selection.Sum(i => (decimal)(i.ShownBytes ?? 0));
+            string size = AppItemViewModel.FormatSize(bytes) is { } s ? $"{s}. " : "";
             int blocked = _selection.Count - RemovableSelectionCount;
             string blockedText = blocked > 0 ? $"{blocked} can't be removed here and will be skipped. " : "";
             return $"{size}{blockedText}Each app's own uninstaller runs one at a time.";
@@ -177,7 +236,15 @@ public sealed partial class ApplicationsViewModel : ObservableObject
 
     partial void OnSortIndexChanged(int value)
     {
-        bool descending = value is 2 or 3;
+        if (value != 6 && _recentBySize)
+        {
+            _recentBySize = false;
+        }
+        bool descending = value is 2 or 3 or 6;
+        if (value == 6)
+        {
+            _ = LoadActivityAsync(++_activityScan);
+        }
         if (SortDescending != descending) SortDescending = descending;
         else ApplyView();
         NotifySortHeaders();
@@ -233,7 +300,12 @@ public sealed partial class ApplicationsViewModel : ObservableObject
             HasLoaded = true;
             ApplyView();
             _ = LoadDriveNamesAsync(++_driveScan);
+            if (SortIndex == 6)
+            {
+                _ = LoadActivityAsync(++_activityScan);
+            }
             StartGameScan();
+            StartSizeScan();
             Selected = selectedId is null ? null : Items.FirstOrDefault(i => i.Record.Id == selectedId);
             PerformanceAudit.InventoryReady(_all.Count, timing.Elapsed.TotalMilliseconds);
         }
@@ -439,10 +511,78 @@ public sealed partial class ApplicationsViewModel : ObservableObject
             _all.AddRange(games.Select(game => new AppItemViewModel(game.Record, game.Launch)));
             foreach (AppItemViewModel item in _all) item.UpdateDriveName(_driveNames);
             ApplyView();
+            StartSizeScan();
         }
         catch (Exception error)
         {
             ShowMessage(InfoBarSeverity.Warning, "Couldn't find games", error.Message);
+        }
+    }
+
+    private CancellationTokenSource? _sizeScan;
+    private DispatcherQueue? _sizesUi;
+    private int _sizeResort;
+
+    /// <summary>Fills in sizes the installer did not record, one folder at a time, without blocking the list.</summary>
+    private void StartSizeScan()
+    {
+        _sizesUi ??= DispatcherQueue.GetForCurrentThread();
+        _sizeScan?.Cancel();
+        _sizeScan = new CancellationTokenSource();
+        CancellationToken token = _sizeScan.Token;
+        DispatcherQueue? queue = _sizesUi;
+        AppItemViewModel[] pending = _all.Where(item => item.ShownBytes is null).ToArray();
+        if (pending.Length == 0 || queue is null)
+        {
+            return;
+        }
+        _ = Task.Run(() =>
+        {
+            foreach (AppItemViewModel item in pending)
+            {
+                if (token.IsCancellationRequested)
+                {
+                    return;
+                }
+                string? icon = IconLoader.ResolvePath(item.Record);
+                string? executable = icon is not null && icon.EndsWith(".exe", StringComparison.OrdinalIgnoreCase) ? icon : null;
+                ulong? size;
+                try
+                {
+                    size = InstallSize.Measure(item.Record.InstallLocation, executable, token);
+                }
+                catch (OperationCanceledException)
+                {
+                    return;
+                }
+                if (size is not > 0 || token.IsCancellationRequested)
+                {
+                    continue;
+                }
+                queue.TryEnqueue(() =>
+                {
+                    if (token.IsCancellationRequested)
+                    {
+                        return;
+                    }
+                    item.SetMeasuredSize(size.Value);
+                    RefreshSizeSummary();
+                    if (SortIndex == 2 || (SortIndex == 6 && _recentBySize))
+                    {
+                        _ = ResortSizesAsync();
+                    }
+                });
+            }
+        });
+    }
+
+    private async Task ResortSizesAsync()
+    {
+        int resort = ++_sizeResort;
+        await Task.Delay(400);
+        if (resort == _sizeResort && (SortIndex == 2 || (SortIndex == 6 && _recentBySize)))
+        {
+            ApplyView();
         }
     }
 
@@ -473,8 +613,76 @@ public sealed partial class ApplicationsViewModel : ObservableObject
         }
     }
 
+    private async Task LoadActivityAsync(int scan)
+    {
+        try
+        {
+            RecentActivity.Snapshot snapshot = await Task.Run(RecentActivity.Read);
+            if (scan != _activityScan || SortIndex != 6)
+            {
+                return;
+            }
+            bool liveLog = snapshot.IncludesBackgroundLog;
+            string savedLog = Path.Combine(Path.GetTempPath(), "cleanup-run-history.txt");
+            bool savedFresh = File.Exists(savedLog) && File.GetLastWriteTimeUtc(savedLog) > DateTime.UtcNow.AddHours(-12);
+            if (!liveLog && File.Exists(savedLog))
+            {
+                _backgroundLog = savedLog;
+                snapshot = RecentActivity.WithBackgroundLog(snapshot, savedLog);
+            }
+            if (!liveLog && !savedFresh && !_backgroundDeclined)
+            {
+                string log = savedLog;
+                RecentActivity.BackgroundLogResult result = await Task.Run(() => RecentActivity.RequestBackgroundLog(log));
+                if (result == RecentActivity.BackgroundLogResult.Written)
+                {
+                    _backgroundLog = log;
+                    snapshot = RecentActivity.WithBackgroundLog(snapshot, log);
+                }
+                else if (result == RecentActivity.BackgroundLogResult.Declined)
+                {
+                    _backgroundDeclined = true;
+                    ShowMessage(InfoBarSeverity.Informational, "More run history needs approval", "Windows keeps most last-run times for an administrator. Approve the prompt to fill in programs you have opened.");
+                }
+            }
+            if (scan != _activityScan || SortIndex != 6)
+            {
+                return;
+            }
+            _activity = snapshot;
+            ApplyView();
+        }
+        catch (Exception error) when (error is IOException or UnauthorizedAccessException)
+        {
+            // The full list stays; rows simply keep their publisher line.
+        }
+    }
+
+    private void StampActivity()
+    {
+        bool show = SortIndex == 6;
+        foreach (AppItemViewModel item in _all)
+        {
+            string? icon = IconLoader.ResolvePath(item.Record);
+            string? executable = icon is not null && icon.EndsWith(".exe", StringComparison.OrdinalIgnoreCase) ? icon : null;
+            if (item.IsGame && executable is not null && item.Record.InstallLocation is { Length: > 3 } folder
+                && !executable.StartsWith(folder.TrimEnd('\\') + "\\", StringComparison.OrdinalIgnoreCase))
+            {
+                executable = null;
+            }
+            RecentActivity.RunHit hit = show ? _activity.Match(item.Record.InstallLocation, executable, item.Record.PackageFamilyName, item.Name) : default;
+            DateTime? ran = hit.LastRan;
+            if (item.Record.LastRun is DateTime played && (ran is null || played > ran))
+            {
+                ran = played;
+            }
+            item.ApplyRunState(show, hit.Running, ran);
+        }
+    }
+
     private void ApplyView()
     {
+        StampActivity();
         string query = SearchText.Trim();
         IEnumerable<AppItemViewModel> view = _all;
         if (query.Length > 0)
@@ -499,10 +707,18 @@ public sealed partial class ApplicationsViewModel : ObservableObject
         var sorted = SortIndex switch
         {
             1 => OrderKnown(i => string.IsNullOrWhiteSpace(i.Publisher), i => i.Publisher, StringComparer.CurrentCultureIgnoreCase),
-            2 => OrderKnown(i => i.Record.EstimatedSizeBytes is null, i => i.Record.EstimatedSizeBytes),
+            2 => OrderKnown(i => i.ShownBytes is null, i => i.ShownBytes),
             3 => OrderKnown(i => i.InstallDate is null, i => i.InstallDate),
             4 => Order(i => i.TypeText, StringComparer.CurrentCultureIgnoreCase),
             5 => OrderKnown(i => i.DriveRoot is null, i => i.DriveText, StringComparer.CurrentCultureIgnoreCase),
+            // Running programs first, then ones that ran in the last 30 days. Size can reorder this same list.
+            6 => _recentBySize
+                ? SortDescending
+                    ? view.OrderBy(i => i.ShownBytes is null).ThenByDescending(i => i.ShownBytes ?? 0)
+                    : view.OrderBy(i => i.ShownBytes is null).ThenBy(i => i.ShownBytes ?? 0)
+                : SortDescending
+                    ? view.OrderBy(i => !i.IsRunningNow && i.LastRan is null).ThenByDescending(i => i.IsRunningNow ? DateTime.MaxValue : i.LastRan ?? DateTime.MinValue)
+                    : view.OrderBy(i => !i.IsRunningNow && i.LastRan is null).ThenBy(i => i.IsRunningNow ? DateTime.MaxValue : i.LastRan ?? DateTime.MinValue),
             _ => Order(i => i.Name, StringComparer.CurrentCultureIgnoreCase),
         };
         view = sorted.ThenBy(i => i.Name, StringComparer.CurrentCultureIgnoreCase);
@@ -514,10 +730,16 @@ public sealed partial class ApplicationsViewModel : ObservableObject
             Selected = null;
         }
 
-        ulong totalBytes = (ulong)_all.Sum(i => (decimal)(i.Record.EstimatedSizeBytes ?? 0));
-        string size = AppItemViewModel.FormatSize(totalBytes) is { } s ? $" · {s} reported by installers" : "";
+        RefreshSizeSummary();
+    }
+
+    private void RefreshSizeSummary()
+    {
+        ulong totalBytes = (ulong)_all.Sum(i => (decimal)(i.ShownBytes ?? 0));
+        string size = AppItemViewModel.FormatSize(totalBytes) is { } s ? $" · {s}" : "";
         Summary = Items.Count == _all.Count
             ? $"{_all.Count} apps{size}"
             : $"Showing {Items.Count} of {_all.Count} apps";
+        OnPropertyChanged(nameof(MultipleSummary));
     }
 }

@@ -31,7 +31,12 @@
                 <TextBlock x:Name="TitleText" FontSize="13" FontWeight="SemiBold" Text="cleanup" VerticalAlignment="Center" />
             </StackPanel>
             </Grid>
-            <Button x:Name="AppearanceButton" Grid.Column="2" Click="OnAccentClick" AutomationProperties.Name="Appearance and accent" ToolTipService.ToolTip="Appearance and accent" Background="Transparent" BorderThickness="0" Padding="8" VerticalAlignment="Center"><FontIcon Glyph="&#xE790;" FontSize="16"/></Button>
+            <StackPanel x:Name="TitleActions" Grid.Column="2" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                <Button x:Name="AdminButton" Click="OnRunAsAdminClick" AutomationProperties.Name="Run as administrator" ToolTipService.ToolTip="Run as administrator" Background="Transparent" BorderThickness="0" Padding="10,6" VerticalAlignment="Center">
+                    <TextBlock Text="Run as administrator" FontSize="12"/>
+                </Button>
+                <Button x:Name="AppearanceButton" Click="OnAccentClick" AutomationProperties.Name="Appearance and accent" ToolTipService.ToolTip="Appearance and accent" Background="Transparent" BorderThickness="0" Padding="8" VerticalAlignment="Center"><FontIcon Glyph="&#xE790;" FontSize="16"/></Button>
+            </StackPanel>
         </Grid>
 
         <Grid Grid.Row="1">
@@ -63,16 +68,28 @@
                     <ListViewItem Tag="organize" AutomationProperties.Name="Organize"><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="8"/><ColumnDefinition Width="24"/><ColumnDefinition Width="12"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions><FontIcon Grid.Column="1" Glyph="&#xE8B7;" FontSize="16"/><TextBlock Grid.Column="3" Text="Organize" VerticalAlignment="Center"/></Grid></ListViewItem>
                     <ListViewItem Tag="photos" Style="{StaticResource ChildNavigationItemStyle}" AutomationProperties.Name="Photos"><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="8"/><ColumnDefinition Width="16"/><ColumnDefinition Width="24"/><ColumnDefinition Width="12"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions><FontIcon Grid.Column="2" Glyph="&#xE8B9;" FontSize="14"/><TextBlock Grid.Column="4" Text="Photos" VerticalAlignment="Center"/></Grid></ListViewItem>
                     <ListViewItem Tag="videos" Style="{StaticResource ChildNavigationItemStyle}" AutomationProperties.Name="Videos"><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="8"/><ColumnDefinition Width="16"/><ColumnDefinition Width="24"/><ColumnDefinition Width="12"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions><FontIcon Grid.Column="2" Glyph="&#xE714;" FontSize="14"/><TextBlock Grid.Column="4" Text="Videos" VerticalAlignment="Center"/></Grid></ListViewItem>
+                    <ListViewItem Tag="folders" AutomationProperties.Name="Folders"><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="8"/><ColumnDefinition Width="24"/><ColumnDefinition Width="12"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions><FontIcon Grid.Column="1" Glyph="&#xE838;" FontSize="16"/><TextBlock Grid.Column="3" Text="Folders" VerticalAlignment="Center"/></Grid></ListViewItem>
                     <ListViewItem Tag="history" AutomationProperties.Name="History"><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="8"/><ColumnDefinition Width="24"/><ColumnDefinition Width="12"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions><FontIcon Grid.Column="1" Glyph="&#xE81C;" FontSize="16"/><TextBlock Grid.Column="3" Text="History" VerticalAlignment="Center"/></Grid></ListViewItem>
                 </ListView>
                 <Grid x:Name="SelectionSlot" Grid.Row="1" SizeChanged="OnSelectionSlotSizeChanged">
                     <controls:AppSelectionPanel x:Name="SelectionPanel" VerticalAlignment="Bottom" RemoveRequested="OnRemoveSelection" ClearRequested="OnClearSelection"/>
                 </Grid>
-                <ListView x:Name="SettingsNav" Grid.Row="2" SelectionMode="Single" IsMultiSelectCheckBoxEnabled="False"
+                <StackPanel Grid.Row="2">
+                <Button x:Name="PatchNotesButton" Click="OnPatchNotesClick" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
+                    MinHeight="36" Margin="0,0,0,4" Padding="0" CornerRadius="6" Background="Transparent" BorderThickness="0"
+                    AutomationProperties.Name="Patch notes">
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="8"/><ColumnDefinition Width="24"/><ColumnDefinition Width="12"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                        <FontIcon Grid.Column="1" Glyph="&#xE70B;" FontSize="16"/>
+                        <TextBlock Grid.Column="3" Text="Patch notes" VerticalAlignment="Center"/>
+                    </Grid>
+                </Button>
+                <ListView x:Name="SettingsNav" SelectionMode="Single" IsMultiSelectCheckBoxEnabled="False"
                     ItemContainerStyle="{StaticResource NavigationItemStyle}" SelectionChanged="OnSettingsSelectionChanged"
                     AutomationProperties.Name="Settings navigation" ScrollViewer.VerticalScrollBarVisibility="Disabled">
-                    <ListViewItem AutomationProperties.Name="Settings"><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="8"/><ColumnDefinition Width="24"/><ColumnDefinition Width="12"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions><FontIcon Grid.Column="1" Glyph="&#xE713;" FontSize="16"/><TextBlock Grid.Column="3" Text="Settings" VerticalAlignment="Center"/></Grid></ListViewItem>
+                    <ListViewItem Tag="settings" AutomationProperties.Name="Settings"><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="8"/><ColumnDefinition Width="24"/><ColumnDefinition Width="12"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions><FontIcon Grid.Column="1" Glyph="&#xE713;" FontSize="16"/><TextBlock Grid.Column="3" Text="Settings" VerticalAlignment="Center"/></Grid></ListViewItem>
                 </ListView>
+                </StackPanel>
             </Grid>
             <Frame x:Name="ContentFrame" Grid.Column="1"/>
         </Grid>

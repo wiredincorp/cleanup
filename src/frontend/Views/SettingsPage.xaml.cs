@@ -33,6 +33,7 @@ public sealed partial class SettingsPage : Page
         ThemeBox.SelectedIndex = settings.Theme switch { AppTheme.Light => 1, AppTheme.System => 2, _ => 0 };
         BackdropBox.SelectedIndex = settings.Backdrop switch { BackdropKind.Mica => 1, BackdropKind.Solid => 2, _ => 0 };
         AdvancedToggle.IsOn = settings.AdvancedMode;
+        AdminToggle.IsOn = settings.RunAsAdministrator;
         CustomAccentToggle.IsOn = settings.UseCustomAccent;
         AccentHexBox.Text = settings.CustomAccent;
         AccentEditor.Visibility = settings.UseCustomAccent ? Visibility.Visible : Visibility.Collapsed;
@@ -277,6 +278,14 @@ public sealed partial class SettingsPage : Page
         {
             SettingsService.Update(s => s.Backdrop = BackdropBox.SelectedIndex switch { 1 => BackdropKind.Mica, 2 => BackdropKind.Solid, _ => BackdropKind.Acrylic });
             LoadTintControls();
+        }
+    }
+
+    private void OnAdminToggled(object sender, RoutedEventArgs e)
+    {
+        if (!_initializing)
+        {
+            SettingsService.Remember(s => s.RunAsAdministrator = AdminToggle.IsOn);
         }
     }
 

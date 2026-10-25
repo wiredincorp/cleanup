@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="Cleanup.Views.FoldersPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:Cleanup.ViewModels"
+    NavigationCacheMode="Required">
+
+    <Page.KeyboardAccelerators>
+        <KeyboardAccelerator Key="Left" Modifiers="Menu" Invoked="OnBackInvoked" />
+    </Page.KeyboardAccelerators>
+
+    <Grid Padding="24,16,24,24" RowSpacing="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid>
+            <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                <Button x:Name="BackButton" Click="OnBackClick" IsEnabled="False" AutomationProperties.Name="Back" ToolTipService.ToolTip="Back">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon Glyph="&#xE72B;" FontSize="14" />
+                        <TextBlock Text="Back" />
+                    </StackPanel>
+                </Button>
+                <StackPanel Spacing="4">
+                    <TextBlock Text="Folders" Style="{StaticResource TitleTextBlockStyle}" />
+                    <TextBlock x:Name="CountText" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Looking through the drives" />
+                    <TextBlock x:Name="ScanNote" Text="This may take a minute." Visibility="Collapsed" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                </StackPanel>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top" Spacing="8">
+                <Button Content="Open" Click="OnOpenClick" AutomationProperties.Name="Open in Explorer" />
+                <Button Content="Scan log" Click="OnLogClick" AutomationProperties.Name="Scan log" />
+                <Button x:Name="BackgroundScanButton" Content="Scan in background" Click="OnBackgroundClick" AutomationProperties.Name="Scan in background" ToolTipService.ToolTip="Press again to turn it off" />
+                <Button Content="Rescan" Click="OnRescanClick" AutomationProperties.Name="Rescan folders" />
+            </StackPanel>
+        </Grid>
+
+        <TextBlock x:Name="LocationText" Grid.Row="1" Text="This PC" IsTextSelectionEnabled="True" TextTrimming="CharacterEllipsis" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+
+        <TextBox x:Name="SearchBox" Grid.Row="2" PlaceholderText="Search folders and files" AutomationProperties.Name="Search folders" TextChanged="OnSearchChanged" />
+
+        <Grid Grid.Row="3" ColumnSpacing="12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="180" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <ProgressBar x:Name="Progress" IsIndeterminate="True" VerticalAlignment="Center" />
+            <TextBlock x:Name="StatusText" Grid.Column="1" Text="Starting the scan" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+        </Grid>
+
+        <Grid Grid.Row="4" RowSpacing="8">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid Padding="12,0" ColumnSpacing="12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="2*" />
+                    <ColumnDefinition Width="120" />
+                </Grid.ColumnDefinitions>
+                <Button x:Name="NameSort" Content="Name" Tag="Name" Click="OnSortClick" HorizontalAlignment="Left" AutomationProperties.Name="Sort by name" />
+                <Button x:Name="PathSort" Grid.Column="1" Content="Path" Tag="Path" Click="OnSortClick" HorizontalAlignment="Left" AutomationProperties.Name="Sort by path" />
+                <Button x:Name="SizeSort" Grid.Column="2" Content="Size ↓" Tag="Size" Click="OnSortClick" HorizontalAlignment="Right" AutomationProperties.Name="Sort by size" />
+            </Grid>
+            <ListView x:Name="FolderList" Grid.Row="1" IsItemClickEnabled="True" ItemClick="OnItemClick" SelectionMode="Single" AutomationProperties.Name="Folder results">
+                <ListView.ItemTemplate>
+                    <DataTemplate x:DataType="vm:FolderRowViewModel">
+                        <Grid Padding="4,8" ColumnSpacing="12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="2*" />
+                                <ColumnDefinition Width="120" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="{x:Bind Name}" TextTrimming="CharacterEllipsis" />
+                            <TextBlock Grid.Column="1" Text="{x:Bind Path}" TextTrimming="CharacterEllipsis" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            <TextBlock Grid.Column="2" Text="{x:Bind SizeText}" HorizontalAlignment="Right" />
+                        </Grid>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+            <TextBox x:Name="LogText" Grid.Row="2" Height="160" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" Visibility="Collapsed" ScrollViewer.VerticalScrollBarVisibility="Auto" AutomationProperties.Name="Scan log text" />
+        </Grid>
+    </Grid>
+</Page>

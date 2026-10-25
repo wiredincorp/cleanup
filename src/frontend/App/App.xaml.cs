@@ -1,7 +1,9 @@
 using Cleanup.Services;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO.MemoryMappedFiles;
 using System.Runtime.InteropServices;
+using System.Security.Principal;
 using Microsoft.UI.Xaml;
 
 namespace Cleanup;
@@ -46,10 +48,17 @@ public partial class App : Application
 
     public static Window? MainWindow { get; private set; }
 
+    public static bool IsAdministrator { get; } = new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator);
+
     private static string WindowHandleMapName => $"Local\\{AppEnvironment.InstanceName}.MainWindowHandle";
 
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
+        if (RecentActivity.ExportBackgroundLog(Environment.GetCommandLineArgs()))
+        {
+            Exit();
+            return;
+        }
         try { LaunchWindow(); }
         catch (Exception error)
         {
@@ -89,13 +98,29 @@ public partial class App : Application
             AppEnvironment.ConfigureLocalAppDataRootForSelfTest(localAppDataRoot);
         }
 
+        if (!options.Enabled && !options.UiSmoke && SettingsService.Current.RunAsAdministrator && !IsAdministrator
+            && !Environment.GetCommandLineArgs().Any(argument => argument.Equals("--elevate-restart", StringComparison.OrdinalIgnoreCase))
+            && TryStartElevated())
+        {
+            Exit();
+            return;
+        }
+
         if (!options.Enabled)
         {
-            _instanceMutex = new Mutex(true, $"Local\\{AppEnvironment.InstanceName}.MainWindow", out bool ownsInstance);
-            if (!ownsInstance)
+            bool elevateRestart = Environment.GetCommandLineArgs().Any(argument => argument.Equals("--elevate-restart", StringComparison.OrdinalIgnoreCase));
+            _instanceMutex = new Mutex(false, $"Local\\{AppEnvironment.InstanceName}.MainWindow");
+            try
             {
-                ActivateRunningInstance();
-                Exit(); return;
+                if (!_instanceMutex.WaitOne(elevateRestart ? TimeSpan.FromSeconds(15) : TimeSpan.Zero))
+                {
+                    ActivateRunningInstance();
+                    Exit(); return;
+                }
+            }
+            catch (AbandonedMutexException)
+            {
+                // The previous instance closed without releasing the mutex. This launch owns it now.
             }
             ExtractionCache.RemoveStaleInBackground();
         }
@@ -104,6 +129,53 @@ public partial class App : Application
         if (options.UiSmoke && MainWindow is MainWindow normal) normal.ConfigureReleaseSmoke(options);
         MainWindow.Activate();
         if (!options.Enabled) PublishWindowHandle(WinRT.Interop.WindowNative.GetWindowHandle(MainWindow));
+    }
+
+    /// <summary>Starts an elevated copy. Returns false when Windows approval is cancelled.</summary>
+    public static bool TryStartElevated()
+    {
+        string program = Environment.ProcessPath ?? Process.GetCurrentProcess().MainModule?.FileName ?? "";
+        if (program.Length == 0)
+        {
+            return false;
+        }
+        try
+        {
+            Process.Start(new ProcessStartInfo(program)
+            {
+                UseShellExecute = true,
+                Verb = "runas",
+                Arguments = "--elevate-restart",
+            });
+            return true;
+        }
+        catch (Win32Exception error) when (error.NativeErrorCode == 1223)
+        {
+            return false;
+        }
+    }
+
+    /// <summary>Restarts elevated after Windows approval. A cancelled prompt leaves this copy open.</summary>
+    public static void RestartElevated()
+    {
+        if (!TryStartElevated())
+        {
+            return;
+        }
+        if (Current is App app)
+        {
+            try
+            {
+                app._instanceMutex?.ReleaseMutex();
+            }
+            catch (ApplicationException)
+            {
+                // Already released.
+            }
+            app._instanceMutex?.Dispose();
+            app._instanceMutex = null;
+        }
+        Current.Exit();
     }
 
     private void PublishWindowHandle(nint window)

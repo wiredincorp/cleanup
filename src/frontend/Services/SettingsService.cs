@@ -32,6 +32,9 @@ public sealed class AppSettings
     /// <summary>Shows history diagnostics. Never changes confirmations or privileges.</summary>
     public bool AdvancedMode { get; set; }
 
+    /// <summary>When true, the next launch asks Windows to start cleanup as administrator.</summary>
+    public bool RunAsAdministrator { get; set; }
+
     /// <summary>When false, the Windows accent color is used and followed live.</summary>
     public bool UseCustomAccent { get; set; }
 

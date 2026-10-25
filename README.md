@@ -34,6 +34,29 @@ To update, use Settings > Check for updates, then replace `Cleanup.exe` and keep
 
 Open-source source and developer build notes are in the [development guide](docs/development.md).
 
+## Added
+
+- **Recently running** sort. The same apps stay in the list. Programs that are open say **Running**. The others show the date they last ran.
+- While that sort is selected, the date column is labeled **Last run**. Other sorts still show the install date.
+- Last run comes from Windows’ own records: the normal account history, the administrator activity log, Store app last-use data (this fills in Xbox), and Steam’s **Last played** time. Epic games match when that game’s program was actually started.
+- Windows asks once to read the administrator log. The result is kept for 12 hours, so it does not ask on every launch.
+- **Size** for programs whose installer never recorded one. Cleanup adds up that app’s own folder after the list appears. The total at the top includes those sizes.
+- Press **Size** while **Recently running** is selected and the list stays on recently run apps. First press is largest first. Second press is smallest. **Last run** stays visible. Apps with no size stay at the bottom.
+- More installed programs are listed, including items marked as system components, such as NVIDIA pieces and Visual C++ runtimes, and installs that have no uninstall command. **Remove** stays off when there is no uninstaller.
+
+## Fixed
+
+- Install folders saved with a trailing slash now match the program inside them.
+- Apps whose registered program is `uninstall.exe`, such as Steam and MSI Afterburner, now match the program you actually open.
+- Store apps match even when Windows puts a version number in the folder name. That was why Xbox looked like it had never been run.
+- A program is also matched when its file or folder name is the app’s name, including Brave and Edge.
+- Shortcut targets are followed, so a last-run record that points at a shortcut still counts.
+- Setup programs, uninstallers, and other generic helper names do not stamp the wrong last-run date.
+- Folder sizes do not follow links or junctions, and they do not total shared locations such as Program Files, Downloads, or your profile.
+- A folder that takes too long still keeps the size counted so far.
+- Emulator games are not given the emulator’s last-run time.
+- Windows updates, patches, Microsoft system pieces with no uninstaller, Microsoft system pieces in the Windows folder, Edge WebView2, the application compatibility database, the servicing stack, and built-in Windows packages stay off the list. Visual C++, the .NET runtimes, and the Windows SDK stay.
+
 ## Around the project
 
 [Contributing](CONTRIBUTING.md) · [Launch and updates](docs/launch.md) · [Security](SECURITY.md)

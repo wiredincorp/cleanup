@@ -185,6 +185,7 @@ internal static class GameLibrary
                 Scope = "currentUser",
                 InstallLocation = Path.Combine(steamApps, "common", Text(state, "installdir")),
                 InstallDate = UnixDate(Text(state, "LastUpdated")),
+                LastRun = UnixInstant(Text(state, "LastPlayed")),
                 EstimatedSizeBytes = UnsignedOrNull(Text(state, "SizeOnDisk")),
                 Uninstall = new UninstallMethodInfo { Kind = "notAvailable", Reason = "Uninstall this game from Steam's library." },
             }, new LaunchTarget(LaunchKind.Uri, $"steam://rungameid/{appId}"));
@@ -464,8 +465,11 @@ internal static class GameLibrary
     private static string Text(Dictionary<string, object> values, string key) => values.GetValueOrDefault(key) as string ?? "";
 
     private static string? UnixDate(string seconds) =>
+        UnixInstant(seconds)?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+
+    private static DateTime? UnixInstant(string seconds) =>
         long.TryParse(seconds, NumberStyles.Integer, CultureInfo.InvariantCulture, out long unix) && unix > 0
-            ? DateTimeOffset.FromUnixTimeSeconds(unix).LocalDateTime.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)
+            ? DateTimeOffset.FromUnixTimeSeconds(unix).LocalDateTime
             : null;
 
     private static ulong? UnsignedOrNull(string text) =>
