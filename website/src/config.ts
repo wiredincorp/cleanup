@@ -60,6 +60,14 @@ export function latestReleaseUrl(repository: string | null): string | null {
     ? `${url.origin}${url.pathname.replace(/\/$/, '').replace(/\.git$/, '')}/releases/latest` : null;
 }
 
+// The release tag behind the portable download, such as v0.1.6-rc.1. Null unless the link is a GitHub release asset.
+export function releaseTag(config: SiteConfig): string | null {
+  if (!config.portableUrl) return null;
+  const url = new URL(config.portableUrl);
+  const match = url.pathname.match(/\/releases\/download\/([^/]+)\/[^/]+$/);
+  return url.hostname === 'github.com' ? match?.[1] ?? null : null;
+}
+
 export function releasePageUrl(config: SiteConfig): string | null {
   if (config.portableUrl) {
     const url = new URL(config.portableUrl);

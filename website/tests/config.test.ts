@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { discordInvite, latestReleaseUrl, readConfig, releasePageUrl, wingetCommand } from '../src/config.ts';
+import { discordInvite, latestReleaseUrl, readConfig, releasePageUrl, releaseTag, wingetCommand } from '../src/config.ts';
 
 describe('readConfig', () => {
   test('everything stays unset by default', () => {
@@ -36,6 +36,12 @@ test('prerelease downloads link to their tag instead of the stable-only latest r
   const config = readConfig({ VITE_REPOSITORY_URL: 'https://github.com/wiredincorp/cleanup', VITE_DOWNLOAD_URL: 'https://github.com/wiredincorp/cleanup/releases/download/v0.1.1-rc.1/Cleanup.exe' });
   expect(releasePageUrl(config)).toBe('https://github.com/wiredincorp/cleanup/releases/tag/v0.1.1-rc.1');
   expect(releasePageUrl(readConfig({ VITE_REPOSITORY_URL: 'https://github.com/wiredincorp/cleanup' }))).toBe('https://github.com/wiredincorp/cleanup/releases');
+});
+
+test('the header version is the tag behind the portable download', () => {
+  expect(releaseTag(readConfig({}, { downloadUrl: 'https://github.com/wiredincorp/cleanup/releases/download/v0.1.6-rc.1/Cleanup.exe' }))).toBe('v0.1.6-rc.1');
+  expect(releaseTag(readConfig({ VITE_PORTABLE_URL: 'https://example.com/Cleanup.exe' }))).toBeNull();
+  expect(releaseTag(readConfig({}))).toBeNull();
 });
 
 test('release links use the GitHub latest release and reject unrelated paths', () => {

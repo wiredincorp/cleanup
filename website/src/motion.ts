@@ -4,7 +4,7 @@ const SVG_NS = 'http://www.w3.org/2000/svg';
 export function setupMotion() {
   // Keep the original image as the no-JavaScript fallback. Inline tiles let the
   // existing mark assemble independently without changing its geometry.
-  for (const image of document.querySelectorAll<HTMLImageElement>('.brand img, .download-copy > img')) {
+  for (const image of document.querySelectorAll<HTMLImageElement>('.brand img')) {
     const mark = document.createElementNS(SVG_NS, 'svg');
     mark.setAttribute('viewBox', '0 0 638 638');
     mark.setAttribute('width', image.getAttribute('width') ?? '26');
@@ -36,7 +36,7 @@ export function setupMotion() {
         tile.animate([
           { transform: `translate(${style.getPropertyValue('--tile-x')}, ${style.getPropertyValue('--tile-y')}) rotate(${style.getPropertyValue('--tile-turn')}) scale(.78)` },
           { transform: 'translate(0, 0) rotate(0) scale(1)' },
-        ], { duration: 480, delay: index * 35, easing: 'cubic-bezier(.22, 1, .36, 1)', fill: 'backwards' });
+        ], { duration: 560, delay: index * 40, easing: 'cubic-bezier(.16, 1, .3, 1)', fill: 'backwards' });
       });
     };
     brand.addEventListener('pointerenter', replay);
@@ -57,14 +57,12 @@ export function setupMotion() {
     });
   };
   group('.logo-mark');
-  group('.hero-eyebrow, .hero-title-line, .hero-description, .hero-actions, .hero-note', 65, 80);
-  group('.product-stage', 0, 120);
-  group('.section-intro, .workflow-visual, .workflow-copy, .remove-section > div:first-child, .source-section, .install-panel, .faq-section > div, .site-footer');
-  group('.principles-grid article', 80);
-  group('.removal-steps article', 65);
-  group('.download-copy > h2, .download-copy > p, .development-badge', 65, 80);
-  group('.docs-main > h1, .docs-main > p:first-of-type, .docs-notice', 70);
-  group('.docs-main > h2, .docs-main > h3, .docs-main > ul, .docs-main > pre');
+  group('.hero-label, .hero-title-line, .hero-description, .hero-actions, .hero-note', 90, 60);
+  group('.product-stage', 0, 260);
+  group('.section-head, .download-foot, .faq-list, .community, .footer-row');
+  group('.feature-list li', 90);
+  group('.download-choice', 90);
+  group('.docs-main > *', 60);
 
   const show = (element: Element) => {
     element.classList.add('is-revealed');

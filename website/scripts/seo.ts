@@ -14,10 +14,10 @@ export function seo(): Plugin {
       order: 'post',
       handler(html, context) {
         const docs = context.path.includes('build-notes');
-        const title = docs ? 'Download help | cleanup' : 'cleanup for Windows | A little less clutter';
+        const title = docs ? 'Download help | cleanup' : 'cleanup for Windows | Less clutter. More room.';
         const description = docs
           ? 'What to expect when installing cleanup or running its portable Windows 11 version.'
-          : 'A small Windows 11 app for reviewing app removals and organizing folders. Preview changes before anything moves.';
+          : 'Remove apps and sort folders on Windows 11. See every change before it happens.';
         const imageAlt = 'cleanup for Windows 11. A little less clutter. A lot more room.';
         const tags = [
           `<meta name="robots" content="${indexable ? 'index, follow' : 'noindex, nofollow'}" />`,
