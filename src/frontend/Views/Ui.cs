@@ -19,4 +19,8 @@ public static class Ui
         renamed ? $"Name taken; would be saved as \"{Path.GetFileName(destination)}\"" : "";
 
     public static string Size(ulong bytes) => ViewModels.AppItemViewModel.FormatSize(bytes) ?? "0 B";
+
+    /// <summary>Which date decided a photo or video's folder.</summary>
+    public static string CaptureNote(string? captured, string modified) =>
+        string.IsNullOrEmpty(captured) ? $"No date taken. Last changed {modified}" : $"Taken {captured}";
 }

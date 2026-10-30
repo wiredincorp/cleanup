@@ -9,8 +9,14 @@
 //!
 //! Only files directly inside the chosen folder are considered; subfolders are
 //! never entered, so the organizer cannot loop into folders it created.
+//!
+//! Photo and video sorting is the same plan with [`PlanRequest::media`] set:
+//! only that kind of file moves, into date folders built from the date it was
+//! taken or recorded (see [`media`]), or its last-write date when the file
+//! does not say.
 
 pub mod category;
+pub mod media;
 
 use std::collections::HashSet;
 use std::fs::{self, Metadata};
@@ -37,6 +43,7 @@ use windows_sys::Win32::Storage::FileSystem::{
 };
 
 use crate::category::{categorize, is_partial_download, is_shortcut, simple_group};
+use crate::media::{MediaKind, capture_date};
 
 const MAX_FILES: usize = 20_000;
 static FILE_OPERATIONS: std::sync::Mutex<()> = std::sync::Mutex::new(());
@@ -91,6 +98,9 @@ pub struct PlanRequest {
     pub match_category: Option<String>,
     #[serde(default)]
     pub skip_collisions: bool,
+    /// Sort only photos or only videos, by capture date. Requires [`GroupBy::Date`].
+    #[serde(default)]
+    pub media: Option<MediaKind>,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -105,6 +115,9 @@ pub struct PlannedOperation {
     pub modified: String,
     pub renamed: bool,
     pub identity: Option<FileIdentity>,
+    /// Date taken or recorded, `YYYY-MM-DD`, when a media sort read one.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub captured: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -125,6 +138,8 @@ pub struct Plan {
     pub total_bytes: u64,
     pub folder_count: usize,
     pub renamed_count: usize,
+    /// Files a media sort leaves alone because they are another kind of file.
+    pub other_files: usize,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -182,6 +197,8 @@ pub struct Locations {
     pub downloads: Option<String>,
     pub desktop: Option<String>,
     pub documents: Option<String>,
+    pub pictures: Option<String>,
+    pub videos: Option<String>,
 }
 
 pub fn locations() -> Locations {
@@ -190,6 +207,8 @@ pub fn locations() -> Locations {
         downloads: text(KnownFolder::Downloads),
         desktop: text(KnownFolder::Desktop),
         documents: text(KnownFolder::Documents),
+        pictures: text(KnownFolder::Pictures),
+        videos: text(KnownFolder::Videos),
     }
 }
 
@@ -288,9 +307,8 @@ fn skip_reason(metadata: &Metadata, extension: &str) -> Option<&'static str> {
     }
 }
 
-/// Local calendar (year, month) of a file's last-write time.
-fn local_year_month(metadata: &Metadata) -> (i64, u32) {
-    let utc = metadata.last_write_time();
+/// Local calendar (year, month, day) of a UTC FILETIME tick count.
+fn local_date(utc: u64) -> (i64, u32, u32) {
     let input = FILETIME {
         dwLowDateTime: utc as u32,
         dwHighDateTime: (utc >> 32) as u32,
@@ -306,8 +324,7 @@ fn local_year_month(metadata: &Metadata) -> (i64, u32) {
         utc
     };
     let seconds = (ticks as i64 - 116_444_736_000_000_000) / 10_000_000;
-    let (year, month, _) = civil_from_days(seconds.div_euclid(86_400));
-    (year, month)
+    civil_from_days(seconds.div_euclid(86_400))
 }
 
 fn date_folder(kind: DateFolders, year: i64, month: u32) -> Option<String> {
@@ -386,6 +403,11 @@ pub fn plan(request: &PlanRequest) -> Result<Plan> {
 }
 
 pub fn plan_with_cancel(request: &PlanRequest, cancel: &dyn Fn() -> bool) -> Result<Plan> {
+    if request.media.is_some() && request.group_by != GroupBy::Date {
+        return Err(CoreError::invalid(
+            "Photo and video sorting groups files by date.",
+        ));
+    }
     let source = validate_folder(&request.source)?;
     let root = match request.destination.as_deref().map(str::trim) {
         Some(destination) if !destination.is_empty() => validate_folder(destination)?,
@@ -430,6 +452,7 @@ pub fn plan_with_cancel(request: &PlanRequest, cancel: &dyn Fn() -> bool) -> Res
     let mut folders = HashSet::new();
     let mut operations = Vec::new();
     let mut total_bytes = 0u64;
+    let mut other_files = 0;
     for (path, metadata) in entries.into_iter().take(MAX_FILES) {
         if cancel() {
             return Err(CoreError::new(ErrorCode::Cancelled, "Preview cancelled."));
@@ -454,19 +477,21 @@ pub fn plan_with_cancel(request: &PlanRequest, cancel: &dyn Fn() -> bool) -> Res
             });
             continue;
         }
-        if fs::OpenOptions::new()
-            .read(true)
-            .write(true)
-            .open(&path)
-            .is_err()
+        if request
+            .media
+            .is_some_and(|media| !media.includes(&extension))
         {
+            other_files += 1;
+            continue;
+        }
+        let Ok(mut file) = fs::OpenOptions::new().read(true).write(true).open(&path) else {
             skipped.push(SkippedFile {
                 file_name,
                 path: path.to_string_lossy().into_owned(),
                 reason: "File is in use or access is restricted".into(),
             });
             continue;
-        }
+        };
         if request.match_extension.as_ref().is_some_and(|wanted| {
             !extension.eq_ignore_ascii_case(wanted.trim().trim_start_matches('.'))
         }) || request.match_category.as_ref().is_some_and(|wanted| {
@@ -484,7 +509,13 @@ pub fn plan_with_cancel(request: &PlanRequest, cancel: &dyn Fn() -> bool) -> Res
             });
             continue;
         }
-        let (year, month) = local_year_month(&metadata);
+        // Reading the metadata does not change the identity checked at apply.
+        let captured = request
+            .media
+            .and_then(|_| capture_date(&mut file, &extension, local_date));
+        drop(file);
+        let changed = local_date(metadata.last_write_time());
+        let (year, month) = captured.map_or((changed.0, changed.1), |date| (date.year, date.month));
         let folder = relative_folder(request, &extension, year, month);
         if DirectoryGuard::parents(&root.join(&folder).join(&file_name)).is_err() {
             skipped.push(SkippedFile {
@@ -515,10 +546,15 @@ pub fn plan_with_cancel(request: &PlanRequest, cancel: &dyn Fn() -> bool) -> Res
             file_name,
             destination_folder: folder,
             size_bytes: metadata.len(),
-            modified: cleanup_core::time::ticks_to_iso_date(metadata.last_write_time() as i64)
-                .unwrap_or_else(|| "Not reported".into()),
+            // The local date, matching the date folders built from it.
+            modified: if metadata.last_write_time() > 0 {
+                format!("{:04}-{:02}-{:02}", changed.0, changed.1, changed.2)
+            } else {
+                "Not reported".into()
+            },
             renamed,
             identity: FileIdentity::of(&path),
+            captured: captured.map(|date| date.iso()),
         });
     }
     let renamed_count = operations.iter().filter(|o| o.renamed).count();
@@ -555,6 +591,7 @@ pub fn plan_with_cancel(request: &PlanRequest, cancel: &dyn Fn() -> bool) -> Res
         total_bytes,
         folder_count: folders.len(),
         renamed_count,
+        other_files,
     })
 }
 
@@ -851,6 +888,15 @@ mod tests {
         }
 
         fn plan(&self, group_by: GroupBy, date_folders: DateFolders) -> Plan {
+            self.request(group_by, date_folders, None).unwrap()
+        }
+
+        fn request(
+            &self,
+            group_by: GroupBy,
+            date_folders: DateFolders,
+            media: Option<MediaKind>,
+        ) -> Result<Plan> {
             plan(&PlanRequest {
                 source: self.inbox.to_string_lossy().into_owned(),
                 group_by,
@@ -859,8 +905,14 @@ mod tests {
                 match_extension: None,
                 match_category: None,
                 skip_collisions: false,
+                media,
             })
-            .unwrap()
+        }
+
+        fn bytes(&self, name: &str, content: &[u8]) -> PathBuf {
+            let path = self.inbox.join(name);
+            fs::write(&path, content).unwrap();
+            path
         }
 
         fn apply(&self, plan: &Plan) -> ApplyResult {
@@ -1183,12 +1235,105 @@ mod tests {
             match_extension: None,
             match_category: None,
             skip_collisions: false,
+            media: None,
         };
         assert_eq!(
             plan_with_cancel(&request, &|| true).unwrap_err().code,
             ErrorCode::Cancelled
         );
         assert!(!f.inbox.join("Images").exists());
+    }
+
+    #[test]
+    fn photos_sort_by_date_taken_and_leave_other_files_alone() {
+        use crate::media::tests::{exif, jpeg_with, mp4_with};
+        let f = Fixture::new("photos");
+        f.bytes(
+            "IMG_0001.jpg",
+            &jpeg_with(&exif(false, 0x9003, "2019:07:15 10:30:00")),
+        );
+        f.file("screenshot.png", "no metadata");
+        f.file("notes.txt", "not a photo");
+        f.bytes("clip.mp4", &mp4_with(1_563_192_000, 0));
+        let plan = f
+            .request(
+                GroupBy::Date,
+                DateFolders::YearMonth,
+                Some(MediaKind::Photos),
+            )
+            .unwrap();
+        assert_eq!(plan.other_files, 2, "the text file and the video stay");
+        assert!(plan.skipped.is_empty());
+        let names: Vec<&str> = plan
+            .operations
+            .iter()
+            .map(|o| o.file_name.as_str())
+            .collect();
+        assert_eq!(names, vec!["IMG_0001.jpg", "screenshot.png"]);
+        let taken = &plan.operations[0];
+        assert_eq!(taken.destination_folder, r"2019\07 - July");
+        assert_eq!(taken.captured.as_deref(), Some("2019-07-15"));
+        // Without a date taken, the local last-write date decides the folder,
+        // and the preview shows that same date.
+        let fallback = &plan.operations[1];
+        assert_eq!(fallback.captured, None);
+        let changed = &fallback.modified;
+        assert!(
+            fallback.destination_folder.starts_with(&format!(
+                r"{}\{} - ",
+                &changed[..4],
+                &changed[5..7]
+            )),
+            "{} from {changed}",
+            fallback.destination_folder
+        );
+
+        let result = f.apply(&plan);
+        assert_eq!((result.moved, result.failed), (2, 0));
+        assert!(f.inbox.join(r"2019\07 - July\IMG_0001.jpg").exists());
+        assert!(f.inbox.join("notes.txt").exists() && f.inbox.join("clip.mp4").exists());
+        let undone = undo(&UndoRequest {
+            journal_directory: f.journal.to_string_lossy().into_owned(),
+            batch_id: result.batch_id,
+        })
+        .unwrap();
+        assert_eq!(undone.restored, 2);
+        assert!(f.inbox.join("IMG_0001.jpg").exists() && !f.inbox.join("2019").exists());
+    }
+
+    #[test]
+    fn videos_sort_by_recording_date() {
+        use crate::media::tests::mp4_with;
+        let f = Fixture::new("videos");
+        f.bytes("clip.mp4", &mp4_with(1_563_192_000, 1));
+        f.file("photo.jpg", "not a video");
+        let plan = f
+            .request(GroupBy::Date, DateFolders::Year, Some(MediaKind::Videos))
+            .unwrap();
+        assert_eq!((plan.operations.len(), plan.other_files), (1, 1));
+        assert_eq!(plan.operations[0].destination_folder, "2019");
+        assert_eq!(plan.operations[0].captured.as_deref(), Some("2019-07-15"));
+    }
+
+    #[test]
+    fn media_sorting_requires_date_grouping() {
+        let f = Fixture::new("media-group");
+        let error = f
+            .request(GroupBy::Type, DateFolders::None, Some(MediaKind::Photos))
+            .unwrap_err();
+        assert_eq!(error.code, ErrorCode::InvalidArgument);
+        // Ordinary plans never report capture dates.
+        f.bytes(
+            "IMG_0001.jpg",
+            &crate::media::tests::jpeg_with(&crate::media::tests::exif(
+                true,
+                0x9003,
+                "2019:07:15 10:30:00",
+            )),
+        );
+        let plan = f.plan(GroupBy::Date, DateFolders::YearMonth);
+        assert_eq!(plan.operations[0].captured, None);
+        assert_eq!(plan.other_files, 0);
     }
 
     #[test]

@@ -17,7 +17,7 @@
 
 - **See your space.** View used and free storage across your drives.
 - **Let apps go.** Find applications, review your selection, and run their official uninstallers. Review leftovers separately.
-- **Sort the pile.** Preview folder organization, choose what moves, and save rules for next time.
+- **Sort the pile.** Preview folder organization, choose what moves, and save rules for next time. Sort photos and videos into year and month folders by the date they were taken.
 - **Keep a clear history.** Review results and undo eligible file moves.
 
 Made with WinUI 3 and Rust, with light and dark themes that feel at home on Windows.
@@ -36,6 +36,7 @@ Open-source source and developer build notes are in the [development guide](docs
 
 ## Added
 
+- **Photos** and **Videos** under Organize sort the photos or videos in a folder into year and month folders by the date they were taken or recorded. A file without that date uses the date it last changed, and the preview says which one was used. Other files stay where they are. Every move is previewed first and can be undone from History.
 - **Recently running** sort. The same apps stay in the list. Programs that are open say **Running**. The others show the date they last ran.
 - While that sort is selected, the date column is labeled **Last run**. Other sorts still show the install date.
 - Last run comes from Windows’ own records: the normal account history, the administrator activity log, Store app last-use data (this fills in Xbox), and Steam’s **Last played** time. Epic games match when that game’s program was actually started.

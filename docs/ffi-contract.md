@@ -48,6 +48,14 @@ History and can be undone if their file identities still match. Undo, leftover r
 and History exports run on managed thread-pool threads. A single Windows API call
 cannot always be interrupted immediately.
 
+Photos and Videos use the same plan request with `"groupBy":"date"` and
+`"media":"photos"` or `"media":"videos"`. Only that kind of file is planned; other files
+are counted in `otherFiles` instead of being listed as skipped. Each operation's date
+folder comes from the date taken or recorded, returned as `captured` (`YYYY-MM-DD`),
+or from the local last-write date in `modified` when the file has none. Dates are read
+from bounded metadata only: EXIF in JPEG, TIFF-based raw, HEIF/AVIF, PNG and WebP, and
+the MP4/QuickTime movie header. Apply, undo and History are unchanged.
+
 Each approved file move carries the identity captured during preview (volume, file
 index, size, and last-write ticks). The core denies concurrent writes while checking
 and moving the file, holds directory ancestors against replacement, and never changes

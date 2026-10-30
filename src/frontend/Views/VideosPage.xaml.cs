@@ -2,7 +2,7 @@ using Microsoft.UI.Xaml.Controls;
 
 namespace Cleanup.Views;
 
-/// <summary>Placeholder for video sorting, a sub-section of Organize.</summary>
+/// <summary>Sorts videos into date folders. A sub-section of Organize; see <see cref="MediaSortView"/>.</summary>
 public sealed partial class VideosPage : Page
 {
     public VideosPage()
