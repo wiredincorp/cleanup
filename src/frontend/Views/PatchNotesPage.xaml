@@ -20,7 +20,7 @@
     <ScrollViewer>
         <StackPanel Padding="24,16,24,32" Spacing="0" MaxWidth="720" HorizontalAlignment="Left">
             <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="Patch notes" />
-            <TextBlock Margin="0,4,0,0" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Everything added and fixed in this copy of cleanup, on top of 0.1.6." TextWrapping="Wrap" />
+            <TextBlock Margin="0,4,0,0" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Everything added and fixed in cleanup 0.1.7, since 0.1.6." TextWrapping="Wrap" />
 
             <TextBlock Style="{StaticResource GroupStyle}" Text="Added" />
 
@@ -57,7 +57,8 @@
             <TextBlock Style="{StaticResource TopicStyle}" Text="Administrator" />
             <TextBlock Style="{StaticResource NoteStyle}" Text="Run as administrator is at the top right. It explains what elevation adds." />
             <TextBlock Style="{StaticResource NoteStyle}" Text="It can restart cleanup elevated so more folders and last-run records can be read." />
-            <TextBlock Style="{StaticResource NoteStyle}" Text="Always run this app as administrator makes later opens start elevated." />
+            <TextBlock Style="{StaticResource NoteStyle}" Text="Always run this app as administrator makes later opens ask Windows to start cleanup elevated. It is off until you turn it on." />
+            <TextBlock Style="{StaticResource NoteStyle}" Text="Windows asks every time. If you say no, cleanup opens as a normal account." />
             <TextBlock Style="{StaticResource NoteStyle}" Text="Settings has a switch for that option, so it can be turned off. The next open is a normal account. The current window stays as it is." />
 
             <TextBlock Style="{StaticResource TopicStyle}" Text="Folders" />
@@ -77,6 +78,9 @@
             <TextBlock Style="{StaticResource NoteStyle}" Text="Patch notes is above Settings." />
 
             <TextBlock Style="{StaticResource GroupStyle}" Text="Fixed" />
+
+            <TextBlock Style="{StaticResource TopicStyle}" Text="Administrator" />
+            <TextBlock Style="{StaticResource NoteStyle}" Text="If Windows cannot start an elevated copy, for example because a policy blocks it, cleanup keeps running as a normal account instead of closing." />
 
             <TextBlock Style="{StaticResource TopicStyle}" Text="Last run" />
             <TextBlock Style="{StaticResource NoteStyle}" Text="Install folders saved with a trailing slash match the program inside them." />

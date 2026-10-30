@@ -112,13 +112,22 @@ if (Get-Process -Name Cleanup -ErrorAction SilentlyContinue | Where-Object { $_.
 Add-Type -Namespace CleanupVerify -Name Spi -MemberDefinition @'
 [DllImport("user32.dll")] public static extern bool SystemParametersInfo(uint action, uint param, ref int value, uint flags);
 [DllImport("user32.dll")] public static extern bool SystemParametersInfo(uint action, uint param, IntPtr value, uint flags);
+[DllImport("user32.dll")] public static extern bool IsWindowVisible(IntPtr window);
 '@
 $getAnimations = 0x1042; $setAnimations = 0x1043
 $originalAnimations = 0
-[void][CleanupVerify.Spi]::SystemParametersInfo($getAnimations, 0, [ref]$originalAnimations, 0)
+if (-not [CleanupVerify.Spi]::SystemParametersInfo($getAnimations, 0, [ref]$originalAnimations, 0)) {
+    throw 'Could not read the current Windows animation setting.'
+}
 try {
     foreach ($animations in 0, 1) {
-        [void][CleanupVerify.Spi]::SystemParametersInfo($setAnimations, 0, [IntPtr]$animations, 2)
+        $animationMode = ('off', 'on')[$animations]
+        $actualAnimations = 0
+        if (-not [CleanupVerify.Spi]::SystemParametersInfo($setAnimations, 0, [IntPtr]$animations, 2) -or
+            -not [CleanupVerify.Spi]::SystemParametersInfo($getAnimations, 0, [ref]$actualAnimations, 0) -or
+            [bool]$actualAnimations -ne [bool]$animations) {
+            throw "Could not turn Windows animations $animationMode."
+        }
         $mainDirectory = Join-Path $run "Main window animations $animations"
         New-Item -ItemType Directory -Path $mainDirectory -Force | Out-Null
         $mainExe = Join-Path $mainDirectory 'Cleanup.exe'
@@ -128,9 +137,13 @@ try {
             Start-Sleep -Seconds 15
             $failure = Join-Path $mainDirectory 'CleanupData/last-error.txt'
             if (Test-Path $failure) {
-                throw "The main window failed to open with animations $(('off', 'on')[$animations]):`n$(Get-Content $failure -Raw)"
+                throw "The main window failed to open with animations ${animationMode}:`n$(Get-Content $failure -Raw)"
             }
-            if ($main.HasExited) { throw "The main window closed on its own with animations $(('off', 'on')[$animations]) (exit $($main.ExitCode))." }
+            if ($main.HasExited) { throw "The main window closed on its own with animations $animationMode (exit $($main.ExitCode))." }
+            $main.Refresh()
+            if (-not [CleanupVerify.Spi]::IsWindowVisible($main.MainWindowHandle)) {
+                throw "The main window was not visible with animations $animationMode."
+            }
         } finally {
             Stop-Process -Id $main.Id -Force -ErrorAction SilentlyContinue
             $main.WaitForExit(10000) | Out-Null
