@@ -131,7 +131,10 @@ public partial class App : Application
         if (!options.Enabled) PublishWindowHandle(WinRT.Interop.WindowNative.GetWindowHandle(MainWindow));
     }
 
-    /// <summary>Starts an elevated copy. Returns false when Windows approval is cancelled.</summary>
+    /// <summary>
+    /// Starts an elevated copy. Returns false when Windows approval is cancelled or
+    /// elevation is unavailable, so the caller carries on unelevated (ADR 0004).
+    /// </summary>
     public static bool TryStartElevated()
     {
         string program = Environment.ProcessPath ?? Process.GetCurrentProcess().MainModule?.FileName ?? "";
@@ -149,8 +152,10 @@ public partial class App : Application
             });
             return true;
         }
-        catch (Win32Exception error) when (error.NativeErrorCode == 1223)
+        catch (Win32Exception)
         {
+            // 1223 is a declined prompt; anything else (for example, elevation blocked by
+            // policy) must not stop this launch or close the window that asked.
             return false;
         }
     }
