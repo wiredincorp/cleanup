@@ -151,6 +151,11 @@ internal static class RecentActivity
         {
             return BackgroundLogResult.Declined;
         }
+        catch (Win32Exception)
+        {
+            // Elevation is unavailable, for example blocked by policy. Run history stays partial.
+            return BackgroundLogResult.Unavailable;
+        }
     }
 
     public static Snapshot WithBackgroundLog(Snapshot snapshot, string file)
