@@ -53,6 +53,9 @@ public sealed class AppSettings
     /// <summary>When a file name is already taken: "ask", "keepBoth", or "skip".</summary>
     public string OrganizeCollisions { get; set; } = "ask";
 
+    /// <summary>Date folders for Photos and Videos: "yearMonth", "year", or "month".</summary>
+    public string MediaDateFolders { get; set; } = "yearMonth";
+
     /// <summary>
     /// Folders searched for emulators and their game files, such as a folder that holds your emulators. Steam and
     /// Epic Games libraries are found without this list.

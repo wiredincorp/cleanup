@@ -18,7 +18,7 @@ public sealed partial class MainWindow
                 var samples = new JsonArray();
                 for (int cycle = 0; cycle < 10; cycle++)
                 {
-                    foreach (Type page in new[] { typeof(ApplicationsPage), typeof(OrganizePage), typeof(CorePage), typeof(HistoryPage), typeof(SettingsPage) })
+                    foreach (Type page in new[] { typeof(ApplicationsPage), typeof(OrganizePage), typeof(PhotosPage), typeof(VideosPage), typeof(CorePage), typeof(HistoryPage), typeof(SettingsPage) })
                     {
                         await NavigateAsync(page);
                         await Task.Delay(250);
@@ -35,6 +35,7 @@ public sealed partial class MainWindow
                 report["navigationCycles"] = 10;
                 report["samples"] = samples;
                 report["organizer"] = await OrganizerSmoke.RunAsync(options.FixtureDirectory!);
+                report["photos"] = await OrganizerSmoke.RunPhotosAsync(options.FixtureDirectory!);
                 if (File.Exists(Path.Combine(AppEnvironment.LocalStateDirectory, "last-error.txt"))) throw new InvalidOperationException("The normal application reported an unhandled error. Inspect last-error.txt in the isolated state folder.");
                 report["passed"] = true;
             }
