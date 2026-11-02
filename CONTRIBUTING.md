@@ -25,6 +25,9 @@ development-signed x64 MSIX; that artifact is not a public release.
 - Keep C# presentation separate from Rust system operations and the versioned ABI.
 - Preserve official uninstall mechanisms, explicit confirmation, no-overwrite
   behavior, protected paths, reparse checks and identity checks during undo.
+- Cleanup starts as a standard user. Elevation stays opt-in, goes through a Windows
+  approval prompt, and follows [ADR 0004](docs/adr/0004-opt-in-elevation.md). Do not
+  make it the default, skip the prompt, or rely on it in place of the checks above.
 - Verify destructive workflows only with namespaced fixtures in disposable
   directories or virtual machines. Never use personal files or installed apps.
 - Include reproduction steps, build/test commands and their actual outcomes.

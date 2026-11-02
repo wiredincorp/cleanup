@@ -16,7 +16,8 @@
     </windowsSettings>
   </application>
 
-  <!-- Never request elevation; official uninstallers request it themselves. -->
+  <!-- Always start as the invoking user. Elevation is only requested at run time,
+       through a Windows prompt; see docs/adr/0004-opt-in-elevation.md. -->
   <trustInfo xmlns="urn:schemas-microsoft-com:asm.v2">
     <security>
       <requestedPrivileges xmlns="urn:schemas-microsoft-com:asm.v3">
