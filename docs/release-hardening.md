@@ -26,8 +26,9 @@ Collection is confined to this explicit diagnostic mode; ordinary application be
 ## Release tooling
 
 - `verify-managed.ps1` runs dependency-free .NET regression checks against actual service sources.
-- `verify-ui-smoke.ps1 -ExecutablePath <exe>` opens the actual MainWindow, cycles five pages
-  ten times and exercises production organizer preview/apply/undo with unique disposable files.
+- `verify-ui-smoke.ps1 -ExecutablePath <exe>` opens the actual MainWindow, cycles seven pages
+  (including Photos and Videos) ten times and exercises production organizer and photo-sorting
+  preview/apply/undo with unique disposable files.
   It requires isolated diagnostic paths, and normal singleton/cache initialization remains active.
 - The feasibility test also exercises the production organizer; probe moves remain separate diagnostics.
 - `verify-dependencies.ps1 -InstallAuditTool` installs cargo-audit 0.22.2 in ignored artifacts

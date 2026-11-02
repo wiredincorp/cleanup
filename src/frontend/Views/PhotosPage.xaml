@@ -3,24 +3,8 @@
     x:Class="Cleanup.Views.PhotosPage"
     NavigationCacheMode="Required"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:views="using:Cleanup.Views">
 
-    <Grid Padding="24,16,24,24" RowSpacing="8">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
-
-        <StackPanel Spacing="2">
-            <TextBlock Text="Organize" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-            <TextBlock Text="Photos" Style="{StaticResource TitleTextBlockStyle}" />
-        </StackPanel>
-
-        <StackPanel Grid.Row="1" MaxWidth="420" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="10">
-            <FontIcon Glyph="&#xE8B9;" FontSize="48" HorizontalAlignment="Center" Foreground="{ThemeResource AccentFillColorDefaultBrush}" />
-            <TextBlock Text="Coming soon" Style="{StaticResource SubtitleTextBlockStyle}" HorizontalAlignment="Center" />
-            <TextBlock Text="Photo sorting is still in development. Nothing on this page moves files yet."
-                       TextWrapping="Wrap" TextAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-        </StackPanel>
-    </Grid>
+    <views:MediaSortView Media="photos" />
 </Page>

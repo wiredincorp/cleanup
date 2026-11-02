@@ -12,6 +12,8 @@ public sealed class KnownLocations
     public string? Downloads { get; init; }
     public string? Desktop { get; init; }
     public string? Documents { get; init; }
+    public string? Pictures { get; init; }
+    public string? Videos { get; init; }
 }
 
 public sealed class OrganizePlan
@@ -23,6 +25,8 @@ public sealed class OrganizePlan
     public ulong TotalBytes { get; init; }
     public int FolderCount { get; init; }
     public int RenamedCount { get; init; }
+    /// <summary>Files a photo or video sort leaves alone because they are another kind of file.</summary>
+    public int OtherFiles { get; init; }
 }
 
 public sealed class PlannedOperation
@@ -36,6 +40,8 @@ public sealed class PlannedOperation
     public string DestinationFolder { get; init; } = "";
     public ulong SizeBytes { get; init; }
     public string Modified { get; init; } = "";
+    /// <summary>Date taken or recorded (YYYY-MM-DD) when a photo or video sort read one.</summary>
+    public string? Captured { get; init; }
     public bool Renamed { get; init; }
 }
 
@@ -68,7 +74,7 @@ public sealed class UndoResult
 
 public sealed record FileIdentityInfo(ulong SizeBytes, ulong ModifiedTicks, uint? Volume, ulong? FileIndex);
 
-internal sealed record OrganizePlanRequest(string Source, string GroupBy, string DateFolders, string? Destination, string? MatchExtension, string? MatchCategory, bool SkipCollisions);
+internal sealed record OrganizePlanRequest(string Source, string GroupBy, string DateFolders, string? Destination, string? MatchExtension, string? MatchCategory, bool SkipCollisions, string? Media);
 
 internal sealed record ApplyOperation(uint Id, string Source, string Destination, FileIdentityInfo? Identity);
 
@@ -180,8 +186,9 @@ internal static unsafe class Features
     public static Task<KnownLocations> GetLocationsAsync() =>
         CallAsync(new EmptyRequest(), Json.EmptyRequest, Json.KnownLocations, &NativeMethods.cln_organize_locations);
 
-    public static Task<OrganizePlan> PlanAsync(string source, string groupBy, string dateFolders, string? destination = null, string? extension = null, string? category = null, bool skipCollisions = false, CancellationToken cancellation = default) =>
-        OperationAsync(new OrganizePlanRequest(source, groupBy, dateFolders, destination, extension, category, skipCollisions), Json.OrganizePlanRequest, Json.OrganizePlan, (nint)(delegate*<byte*, nuint, out OperationHandle, NativeBuffer*, int>)&NativeMethods.cln_organize_plan_start, cancellation);
+    /// <param name="media">"photos" or "videos" to sort only that kind of file by capture date; requires "date" grouping.</param>
+    public static Task<OrganizePlan> PlanAsync(string source, string groupBy, string dateFolders, string? destination = null, string? extension = null, string? category = null, bool skipCollisions = false, string? media = null, CancellationToken cancellation = default) =>
+        OperationAsync(new OrganizePlanRequest(source, groupBy, dateFolders, destination, extension, category, skipCollisions, media), Json.OrganizePlanRequest, Json.OrganizePlan, (nint)(delegate*<byte*, nuint, out OperationHandle, NativeBuffer*, int>)&NativeMethods.cln_organize_plan_start, cancellation);
 
     public static Task<OrganizeApplyResult> ApplyAsync(OrganizePlan plan, IEnumerable<PlannedOperation> operations, string title, CancellationToken cancellation = default) =>
         OperationAsync(

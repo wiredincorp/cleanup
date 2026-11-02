@@ -2,7 +2,7 @@ using Microsoft.UI.Xaml.Controls;
 
 namespace Cleanup.Views;
 
-/// <summary>Placeholder for photo sorting, a sub-section of Organize.</summary>
+/// <summary>Sorts photos into date folders. A sub-section of Organize; see <see cref="MediaSortView"/>.</summary>
 public sealed partial class PhotosPage : Page
 {
     public PhotosPage()

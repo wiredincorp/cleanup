@@ -24,6 +24,15 @@
 
             <TextBlock Style="{StaticResource GroupStyle}" Text="Added" />
 
+            <TextBlock Style="{StaticResource TopicStyle}" Text="Photos and Videos" />
+            <TextBlock Style="{StaticResource NoteStyle}" Text="Photos and Videos under Organize sort files now instead of saying Coming soon." />
+            <TextBlock Style="{StaticResource NoteStyle}" Text="Choose a folder, or start from Pictures, Videos, Downloads, or Desktop. Only photos, or only videos, move." />
+            <TextBlock Style="{StaticResource NoteStyle}" Text="Each file goes into a year and month folder for the date it was taken or recorded. Options can use year folders or month folders instead, and can put the folders somewhere else." />
+            <TextBlock Style="{StaticResource NoteStyle}" Text="Photo dates come from camera data in JPEG, HEIC, AVIF, PNG, WebP, TIFF, and camera raw files. Video dates come from MP4, MOV, M4V, and 3GP files." />
+            <TextBlock Style="{StaticResource NoteStyle}" Text="A file without that date uses the date it last changed. The preview says which date was used." />
+            <TextBlock Style="{StaticResource NoteStyle}" Text="Other files stay where they are. Only files directly in the chosen folder are sorted, and subfolders are left as they are." />
+            <TextBlock Style="{StaticResource NoteStyle}" Text="Every move is previewed first, nothing is overwritten, and History can undo it." />
+
             <TextBlock Style="{StaticResource TopicStyle}" Text="Recently running" />
             <TextBlock Style="{StaticResource NoteStyle}" Text="A Recently running sort. The same apps stay in the list." />
             <TextBlock Style="{StaticResource NoteStyle}" Text="Programs that are open say Running." />
