@@ -34,7 +34,7 @@ To update, use Settings > Check for updates, then replace `Cleanup.exe` and keep
 
 Open-source source and developer build notes are in the [development guide](docs/development.md).
 
-## Added
+## Added in 0.1.7
 
 - **Photos** and **Videos** under Organize sort the photos or videos in a folder into year and month folders by the date they were taken or recorded. A file without that date uses the date it last changed, and the preview says which one was used. Other files stay where they are. Every move is previewed first and can be undone from History.
 - **Recently running** sort. The same apps stay in the list. Programs that are open say **Running**. The others show the date they last ran.
@@ -44,9 +44,13 @@ Open-source source and developer build notes are in the [development guide](docs
 - **Size** for programs whose installer never recorded one. Cleanup adds up that app’s own folder after the list appears. The total at the top includes those sizes.
 - Press **Size** while **Recently running** is selected and the list stays on recently run apps. First press is largest first. Second press is smallest. **Last run** stays visible. Apps with no size stay at the bottom.
 - More installed programs are listed, including items marked as system components, such as NVIDIA pieces and Visual C++ runtimes, and installs that have no uninstall command. **Remove** stays off when there is no uninstaller.
+- **Folders** in the sidebar shows which folders use the most space. Each folder appears as soon as it is measured. Search finds folders and files by name, and Name, Path, and Size sort both ways. **Scan in background** keeps a scan going while other pages are open. Windows system folders and the page, hibernation, and swap files are left out.
+- **Patch notes**, above Settings, lists what changed in this version.
+- **Run as administrator**, at the top right, can restart Cleanup elevated so more folder sizes and last-run dates can be read. **Always run as administrator** is off until you turn it on. With it on, Windows asks on every launch, and the switch in Settings turns it back off. See [ADR 0004](docs/adr/0004-opt-in-elevation.md).
 
-## Fixed
+## Fixed in 0.1.7
 
+- If Windows cannot start an elevated copy, Cleanup keeps running as a normal account instead of closing.
 - Install folders saved with a trailing slash now match the program inside them.
 - Apps whose registered program is `uninstall.exe`, such as Steam and MSI Afterburner, now match the program you actually open.
 - Store apps match even when Windows puts a version number in the folder name. That was why Xbox looked like it had never been run.
